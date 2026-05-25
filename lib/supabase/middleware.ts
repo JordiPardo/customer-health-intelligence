@@ -1,6 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const PROTECTED_PREFIXES = ["/dashboard", "/customers", "/playbooks"];
+
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+function redirectToLogin(request: NextRequest, pathname: string) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/login";
+  url.searchParams.set("next", pathname);
+  return NextResponse.redirect(url);
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -35,18 +48,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/signup") ||
     pathname.startsWith("/auth");
 
-  if (!user && pathname.startsWith("/dashboard")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
-  }
-
-  if (!user && pathname.startsWith("/customers")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+  if (!user && isProtectedPath(pathname)) {
+    return redirectToLogin(request, pathname);
   }
 
   if (user && (pathname === "/login" || pathname === "/signup")) {

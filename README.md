@@ -104,6 +104,17 @@ data/synthetic/   # Generated CSVs (gitignored)
 
 Synthetic data is scoped to demo org `Acme analytics demo` (`00000000-0000-4000-8000-000000000001`). New sign-ups are auto-added to this org via a database trigger (portfolio demo).
 
+## Deploy (Vercel)
+
+Host the app so it runs without `npm run dev` on your machine. Supabase is already cloud-hosted.
+
+**Full checklist:** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+1. Import the GitHub repo on [Vercel](https://vercel.com/new)
+2. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+3. In Supabase → **Authentication** → **URL configuration**, add your Vercel URL and `http://localhost:3000/**` to redirect URLs
+4. Deploy; smoke-test signup, dashboard, customers, playbooks
+
 ## Development phases
 
 See your project spec for the full 10–12 week roadmap. **Phases 1–4** are in place (foundation, survival ML, auth + dashboard, causal playbooks). Next: **Phase 5** A/B experiments.
