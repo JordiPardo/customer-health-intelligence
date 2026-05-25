@@ -8,6 +8,7 @@ Open your **production** URL (not a preview link) in a private/incognito window:
 
 - [ ] No **Vercel login** gate (see [Deployment Protection](DEPLOYMENT.md#7-vercel-deployment-protection-public-demo))
 - [ ] `/` — landing page loads
+- [ ] `/demo/dashboard` — public demo loads **without** login (recruiter path)
 - [ ] `/signup` — create a new test account
 - [ ] `/dashboard` — metrics show ~500 customers, chart, anomalies
 - [ ] `/customers` — table with risk badges
@@ -38,6 +39,7 @@ curl -s -o /dev/null -w "%{http_code}\n" \
 ## README / portfolio (recommended)
 
 - [ ] Add your **live demo URL** to `README.md` (top or Deploy section)
+- [ ] Share **`/demo/dashboard`** for visitors who should not sign up
 - [ ] Add 1–2 screenshots (dashboard, customer detail) for GitHub/Vercel
 - [ ] Note: “Sign up to explore demo data” (email confirmation off in Supabase for easy access)
 

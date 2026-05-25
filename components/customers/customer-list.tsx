@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { appPath, type AppBase } from "@/lib/app-path";
 import type { CustomerWithRisk } from "@/lib/types";
 import { getRiskLevel } from "@/lib/risk";
 import { RiskBadge } from "@/components/ui/risk-badge";
 
 type RiskFilter = "all" | "high" | "medium" | "low";
 
-export function CustomerList({ customers }: { customers: CustomerWithRisk[] }) {
+export function CustomerList({
+  customers,
+  base = "",
+}: {
+  customers: CustomerWithRisk[];
+  base?: AppBase;
+}) {
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState<RiskFilter>("all");
   const [sortKey, setSortKey] = useState<"name" | "mrr" | "risk">("risk");
@@ -86,7 +93,7 @@ export function CustomerList({ customers }: { customers: CustomerWithRisk[] }) {
               >
                 <td className="px-4 py-3">
                   <Link
-                    href={`/customers/${c.id}`}
+                    href={appPath(base, `/customers/${c.id}`)}
                     className="font-medium text-[var(--primary)] hover:underline"
                   >
                     {c.name}

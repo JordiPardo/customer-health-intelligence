@@ -109,7 +109,8 @@ Synthetic data is scoped to demo org `Acme analytics demo` (`00000000-0000-4000-
 <!-- Replace with your production Vercel URL -->
 **Demo:** https://your-app.vercel.app
 
-Sign up to explore the demo org (500 customers, survival predictions, playbooks).
+**No login:** [View demo](/demo/dashboard) (read-only, synthetic data).  
+**Full app:** sign up to explore the demo org (500 customers, survival predictions, playbooks).
 
 ## Deploy (Vercel)
 

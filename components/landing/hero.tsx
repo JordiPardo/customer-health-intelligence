@@ -39,7 +39,7 @@ export function Hero() {
           <Link href="/signup">
             <Button>Start free trial</Button>
           </Link>
-          <Link href="/login">
+          <Link href="/demo/dashboard">
             <Button variant="secondary">View demo</Button>
           </Link>
         </div>

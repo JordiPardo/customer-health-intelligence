@@ -19,6 +19,11 @@ export default function LoginPage() {
             Start free trial
           </Link>
         </p>
+        <p className="mt-3 text-base text-[var(--muted)]">
+          <Link href="/demo/dashboard" className="text-[var(--primary)] hover:underline">
+            View demo without signing in
+          </Link>
+        </p>
       </div>
     </div>
   );
