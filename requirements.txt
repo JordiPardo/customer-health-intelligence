@@ -1,0 +1,10 @@
+pandas>=2.2
+numpy>=1.26
+python-dotenv>=1.0
+supabase>=2.10
+psycopg2-binary>=2.9
+lifelines>=0.30
+scikit-learn>=1.5
+stripe>=11.0
+# econml has heavy deps; install when starting causal inference (Phase 4)
+# econml>=0.15
