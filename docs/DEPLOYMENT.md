@@ -74,10 +74,20 @@ After deploy:
 5. `/playbooks` — 12 causal estimate rows
 6. Sign out and confirm `/dashboard` redirects to `/login`
 
-## 6. Troubleshooting
+## 7. Vercel Deployment Protection (public demo)
+
+If **incognito** or another device shows **“Log in to Vercel”** (not your app’s `/login`):
+
+1. Vercel project → **Settings** → **Deployment Protection** (or **Vercel Authentication**)
+2. For **Production**: disable protection, or set **Only Preview Deployments** protected
+3. Use the **production** domain (`*.vercel.app` without `git-` in the name), not a preview URL
+4. Test again in incognito
+
+## 8. Troubleshooting
 
 | Issue | Fix |
 |--------|-----|
+| Incognito asks for Vercel login | Turn off Deployment Protection for Production (step 7) |
 | Login redirects to localhost | Fix Supabase Site URL + Redirect URLs (step 3) |
 | Dashboard empty / errors | Check all 3 env vars on Vercel; redeploy after adding them |
 | `auth/callback` error | Ensure redirect URL includes `/auth/callback` |
@@ -98,3 +108,7 @@ These stay local or move to GitHub Actions later:
 - `scripts/run_causal_pipeline.py`
 
 The live site reads data already stored in Supabase.
+
+## After go-live
+
+See [POST_DEPLOY_CHECKLIST.md](POST_DEPLOY_CHECKLIST.md) before starting Phase 5.
