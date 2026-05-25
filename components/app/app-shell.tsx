@@ -87,6 +87,7 @@ function MobileNav({ base, isDemo }: { base: AppBase; isDemo: boolean }) {
     { suffix: "/dashboard", label: "Dashboard" },
     { suffix: "/customers", label: "Customers" },
     { suffix: "/playbooks", label: "Playbooks" },
+    { suffix: "/experiments", label: "Experiments" },
   ] as const;
 
   return (

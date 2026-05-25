@@ -13,6 +13,8 @@ Open your **production** URL (not a preview link) in a private/incognito window:
 - [ ] `/dashboard` — metrics show ~500 customers, chart, anomalies
 - [ ] `/customers` — table with risk badges
 - [ ] `/playbooks` — 12 rows (4 treatments × 3 segments)
+- [ ] `/experiments` — 4 experiments (3 completed, 1 running)
+- [ ] Open an experiment → uplift, p-value, churn comparison
 - [ ] Open a customer → survival + usage charts + playbook recommendations
 - [ ] Sign out → `/dashboard` redirects to `/login`
 
@@ -64,7 +66,7 @@ python scripts/run_causal_pipeline.py --replace
 
 | Item | When |
 |------|------|
-| Phase 5 experiments UI + data | Next feature work |
+| Phase 5 experiments UI + data | Run migration 003 + `run_experiments_pipeline.py --replace` |
 | Middleware → proxy migration (Next 16 warning) | Cosmetic; later |
 | Replace service-role reads with strict RLS | Before real multi-tenant product |
 | GitHub Actions for scheduled ML | After Phase 5+ |

@@ -1,10 +1,13 @@
+import Link from "next/link";
 import { PlaybookTable } from "@/components/playbooks/playbook-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
 import { getPlaybooks } from "@/lib/queries/playbooks";
 
-export async function PlaybooksView() {
+import { type AppBase } from "@/lib/app-path";
+
+export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
   const playbooks = await getPlaybooks();
 
   const segments = ["SMB", "Mid-Market", "Enterprise"] as const;
@@ -23,6 +26,14 @@ export async function PlaybooksView() {
             <StatusBadge>{playbooks.length} estimates</StatusBadge>
             <StatusBadge>3 segments</StatusBadge>
           </>
+        }
+        actions={
+          <Link
+            href={base ? `${base}/experiments` : "/experiments"}
+            className="inline-flex h-8 items-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-medium shadow-[var(--shadow-sm)] transition-colors hover:bg-[var(--border-subtle)]"
+          >
+            View experiments →
+          </Link>
         }
       />
 

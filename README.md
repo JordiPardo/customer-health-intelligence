@@ -72,7 +72,17 @@ python scripts/run_causal_pipeline.py --replace
 
 Estimates average treatment effects (OLS-adjusted + bootstrap) per retention playbook and segment, then writes to `causal_estimates`. Outputs also saved to `data/synthetic/causal_estimates.csv`.
 
-### 7. Run the app (Phase 3–4)
+### 7. A/B experiments (Phase 5)
+
+In Supabase → **SQL Editor**, run `supabase/migrations/003_experiments_metadata.sql` (once).
+
+```bash
+python scripts/run_experiments_pipeline.py --replace
+```
+
+Seeds randomized experiments with treatment/control assignments and results for the demo org. Outputs also saved to `data/synthetic/experiments.csv`.
+
+### 8. Run the app (Phase 3–5)
 
 ```bash
 npm run dev
@@ -82,6 +92,7 @@ npm run dev
 - Sign up: http://localhost:3000/signup (adds you to the demo org via DB trigger)
 - Dashboard: http://localhost:3000/dashboard
 - Playbooks: http://localhost:3000/playbooks
+- Experiments: http://localhost:3000/experiments
 
 In Supabase → **Authentication → Providers**, ensure **Email** is enabled. For local dev, you can disable **Confirm email** under Email settings so sign-up works instantly.
 
@@ -125,4 +136,4 @@ Host the app so it runs without `npm run dev` on your machine. Supabase is alrea
 
 ## Development phases
 
-See your project spec for the full 10–12 week roadmap. **Phases 1–4** are in place (foundation, survival ML, auth + dashboard, causal playbooks). Next: **Phase 5** A/B experiments.
+See your project spec for the full 10–12 week roadmap. **Phases 1–5** are in place (foundation, survival ML, auth + dashboard, causal playbooks, A/B experiments). Next: **Phase 6** billing / production hardening.

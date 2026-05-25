@@ -59,3 +59,27 @@ export type PlaybookRow = CausalEstimate & {
   description: string;
   action: string;
 };
+
+export type ExperimentStatus = "running" | "completed";
+
+export type ExperimentResult = {
+  treatment_churn_rate: number;
+  control_churn_rate: number;
+  uplift_pct: number;
+  p_value: number;
+};
+
+export type ExperimentRow = {
+  id: string;
+  name: string;
+  treatment: string | null;
+  segment: string | null;
+  description: string | null;
+  status: ExperimentStatus;
+  started_at: string;
+  ended_at: string | null;
+  treatment_count: number;
+  control_count: number;
+  result: ExperimentResult | null;
+  label: string;
+};

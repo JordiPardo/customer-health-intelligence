@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const DEMO_PREFIX = "/demo";
-const PROTECTED_PREFIXES = ["/dashboard", "/customers", "/playbooks"];
+const PROTECTED_PREFIXES = ["/dashboard", "/customers", "/playbooks", "/experiments"];
 
 function isDemoPath(pathname: string): boolean {
   return pathname === DEMO_PREFIX || pathname.startsWith(`${DEMO_PREFIX}/`);

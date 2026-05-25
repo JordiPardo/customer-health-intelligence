@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { suffix: "/dashboard", label: "Dashboard" },
   { suffix: "/customers", label: "Customers" },
   { suffix: "/playbooks", label: "Playbooks" },
+  { suffix: "/experiments", label: "Experiments" },
 ] as const;
 
 function navIcon(suffix: string) {
@@ -30,6 +31,13 @@ function navIcon(suffix: string) {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       );
+    case "/experiments":
+      return (
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+          <path d="M9 3h6v7l5 9H4l5-9V3z" />
+          <path d="M10 3h4" />
+        </svg>
+      );
     default:
       return (
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
@@ -50,7 +58,8 @@ export function SidebarNav({ base = "" }: { base?: AppBase }) {
         const href = appPath(base, item.suffix);
         const active =
           pathname === href ||
-          (item.suffix !== "/dashboard" && pathname.startsWith(`${href}/`));
+          (item.suffix !== "/dashboard" && pathname.startsWith(`${href}/`)) ||
+          (item.suffix !== "/dashboard" && pathname === href);
 
         return (
           <Link
