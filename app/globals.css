@@ -24,6 +24,9 @@
   --radius-lg: 0.75rem;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-preview: 0 8px 30px rgb(0 0 0 / 0.08), 0 2px 8px rgb(0 0 0 / 0.04);
+  --shadow-preview-hover: 0 12px 40px rgb(0 0 0 / 0.1), 0 4px 12px rgb(0 0 0 / 0.05);
+  --surface-muted: #f4f4f5;
 }
 
 @theme inline {
@@ -100,6 +103,28 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
+  }
+
+  .surface-card-interactive {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .surface-card-interactive:hover {
+    border-color: #d4d4d8;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.06);
+  }
+
+  .metric-card-hover {
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .metric-card-hover:hover {
+    border-color: #d4d4d8;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.06);
   }
 
   .table-shell thead th {

@@ -25,16 +25,22 @@ export function AppShell({
             isDemo ? "top-9 bottom-0" : "inset-y-0"
           }`}
         >
-          <div className="flex h-14 shrink-0 items-center border-b border-[var(--border)] px-5">
+          <div className="border-b border-[var(--border)] px-4 py-3.5">
             <Link
               href={homeHref}
-              className="truncate text-sm font-semibold tracking-tight text-[var(--foreground)]"
+              className="block truncate text-sm font-semibold tracking-tight text-[var(--foreground)]"
             >
               Customer health
             </Link>
+            <p className="mt-1 truncate text-[11px] text-[var(--muted)]">
+              {isDemo ? "Demo organization" : "Your workspace"}
+            </p>
           </div>
 
-          <div className="flex flex-1 flex-col py-4">
+          <div className="flex flex-1 flex-col py-3">
+            <p className="px-4 pb-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--muted)]">
+              Analytics
+            </p>
             <SidebarNav base={base} />
           </div>
 
@@ -67,8 +73,8 @@ export function AppShell({
             <MobileNav base={base} isDemo={isDemo} />
           </header>
 
-          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-            <div className="mx-auto max-w-6xl">{children}</div>
+          <main className="flex-1 px-4 py-5 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl">{children}</div>
           </main>
         </div>
       </div>

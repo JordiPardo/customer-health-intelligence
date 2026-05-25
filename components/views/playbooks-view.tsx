@@ -1,7 +1,7 @@
 import { PlaybookTable } from "@/components/playbooks/playbook-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
 import { getPlaybooks } from "@/lib/queries/playbooks";
 
 export async function PlaybooksView() {
@@ -14,10 +14,16 @@ export async function PlaybooksView() {
   }));
 
   return (
-    <div className="space-y-8">
-      <PageHeader
+    <div className="space-y-6">
+      <PageToolbar
         title="Retention playbooks"
-        description="Causal average treatment effects (ATE) by segment from OLS-adjusted observational data. Positive values suggest lower churn among treated proxies."
+        description="Causal average treatment effects (ATE) by segment from OLS-adjusted observational data."
+        meta={
+          <>
+            <StatusBadge>{playbooks.length} estimates</StatusBadge>
+            <StatusBadge>3 segments</StatusBadge>
+          </>
+        }
       />
 
       {playbooks.length === 0 ? (

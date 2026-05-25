@@ -4,6 +4,7 @@ import { SurvivalChart } from "@/components/charts/survival-chart";
 import { UsageChart } from "@/components/charts/usage-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
 import { MetricCard } from "@/components/ui/metric-card";
 import { RiskBadge } from "@/components/ui/risk-badge";
 import { appPath, type AppBase } from "@/lib/app-path";
@@ -29,24 +30,26 @@ export async function CustomerDetailView({
   ]);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Link
-          href={appPath(base, "/customers")}
-          className="mb-4 inline-flex items-center gap-1 text-xs font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
-        >
-          ← Customers
-        </Link>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1>{customer.name}</h1>
-            <p className="mt-1.5 text-caption">
-              {customer.segment} · {customer.plan_tier} · {customer.industry}
-            </p>
-          </div>
-          <RiskBadge score={customer.churn_risk_30d} />
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageToolbar
+        title={customer.name}
+        description={`${customer.segment} · ${customer.plan_tier} · ${customer.industry}`}
+        badge={<RiskBadge score={customer.churn_risk_30d} />}
+        meta={
+          <>
+            <StatusBadge>${customer.mrr.toLocaleString()} MRR</StatusBadge>
+            <StatusBadge>{customer.cohort_month} cohort</StatusBadge>
+          </>
+        }
+        actions={
+          <Link
+            href={appPath(base, "/customers")}
+            className="inline-flex h-8 items-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-medium shadow-[var(--shadow-sm)] transition-colors hover:bg-[var(--border-subtle)]"
+          >
+            ← All customers
+          </Link>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="MRR" value={`$${customer.mrr.toLocaleString()}`} />

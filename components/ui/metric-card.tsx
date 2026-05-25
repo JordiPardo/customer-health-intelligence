@@ -4,12 +4,14 @@ export function MetricCard({
   suffix,
   footer,
   trend,
+  hint,
 }: {
   label: string;
   value: string | number;
   suffix?: string;
   footer?: React.ReactNode;
   trend?: "neutral" | "positive" | "negative";
+  hint?: string;
 }) {
   const trendColor =
     trend === "positive"
@@ -19,10 +21,13 @@ export function MetricCard({
         : "";
 
   return (
-    <div className="surface-card px-5 py-4">
-      <p className="text-label mb-2">{label}</p>
+    <div className="surface-card metric-card-hover px-4 py-3.5">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <p className="text-label">{label}</p>
+        {hint && <span className="text-[10px] text-[var(--muted)]">{hint}</span>}
+      </div>
       <p
-        className={`text-2xl font-semibold tracking-tight text-[var(--foreground)] ${trendColor}`}
+        className={`text-2xl font-semibold tracking-tight tabular-nums text-[var(--foreground)] ${trendColor}`}
       >
         {value}
         {suffix && (
@@ -31,7 +36,7 @@ export function MetricCard({
           </span>
         )}
       </p>
-      {footer && <div className="mt-3">{footer}</div>}
+      {footer && <div className="mt-2.5">{footer}</div>}
     </div>
   );
 }
