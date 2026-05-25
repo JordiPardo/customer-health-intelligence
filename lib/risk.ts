@@ -15,18 +15,18 @@ export const riskStyles: Record<
   { bg: string; text: string; border: string }
 > = {
   high: {
-    bg: "bg-red-50",
+    bg: "bg-[var(--danger-muted)]",
     text: "text-[var(--danger)]",
-    border: "border-red-200",
+    border: "border-[var(--danger)]/20",
   },
   medium: {
-    bg: "bg-amber-50",
-    text: "text-amber-800",
-    border: "border-amber-200",
+    bg: "bg-[var(--warning-muted)]",
+    text: "text-[var(--warning)]",
+    border: "border-[var(--warning)]/20",
   },
   low: {
-    bg: "bg-green-50",
+    bg: "bg-[var(--success-muted)]",
     text: "text-[var(--success)]",
-    border: "border-green-200",
+    border: "border-[var(--success)]/20",
   },
 };

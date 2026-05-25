@@ -8,7 +8,7 @@ Open your **production** URL (not a preview link) in a private/incognito window:
 
 - [ ] No **Vercel login** gate (see [Deployment Protection](DEPLOYMENT.md#7-vercel-deployment-protection-public-demo))
 - [ ] `/` — landing page loads
-- [ ] `/demo/dashboard` — public demo loads **without** login (recruiter path)
+- [ ] `/demo/dashboard` — public demo loads **without** login (recruiter path); login page is **email** Supabase (not username + Acme/Globex — see [DEPLOYMENT.md §6](DEPLOYMENT.md#6-verify-you-deployed-this-repo))
 - [ ] `/signup` — create a new test account
 - [ ] `/dashboard` — metrics show ~500 customers, chart, anomalies
 - [ ] `/customers` — table with risk badges

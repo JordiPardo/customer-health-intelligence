@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SurvivalChart } from "@/components/charts/survival-chart";
 import { UsageChart } from "@/components/charts/usage-chart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { MetricCard } from "@/components/ui/metric-card";
 import { RiskBadge } from "@/components/ui/risk-badge";
 import { appPath, type AppBase } from "@/lib/app-path";
@@ -31,14 +33,14 @@ export async function CustomerDetailView({
       <div>
         <Link
           href={appPath(base, "/customers")}
-          className="mb-4 inline-block text-base text-[var(--muted)] hover:text-[var(--foreground)]"
+          className="mb-4 inline-flex items-center gap-1 text-xs font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
         >
-          ← Back to customers
+          ← Customers
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="mb-2">{customer.name}</h1>
-            <p className="text-base text-[var(--muted)]">
+            <h1>{customer.name}</h1>
+            <p className="mt-1.5 text-caption">
               {customer.segment} · {customer.plan_tier} · {customer.industry}
             </p>
           </div>
@@ -51,6 +53,7 @@ export async function CustomerDetailView({
         <MetricCard
           label="30d churn risk"
           value={`${(customer.churn_risk_30d * 100).toFixed(0)}%`}
+          trend={customer.churn_risk_30d > 0.6 ? "negative" : "neutral"}
         />
         <MetricCard
           label="90d churn risk"
@@ -62,91 +65,107 @@ export async function CustomerDetailView({
         />
       </div>
 
-      <section className="rounded-lg border border-[var(--border)] bg-white p-5">
-        <h2 className="mb-4">Survival curve (forward-looking)</h2>
-        <p className="mb-4 text-[13px] text-[var(--muted)]">
-          Estimated retention from Cox model, conditional on current tenure.
-          Dotted line = median days to churn when estimable.
-        </p>
-        <SurvivalChart
-          churnRisk30d={customer.churn_risk_30d}
-          churnRisk90d={customer.churn_risk_90d}
-          confidenceInterval={customer.confidence_interval}
-        />
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle
+            subtitle="Estimated retention from Cox model, conditional on current tenure"
+          >
+            Survival curve
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SurvivalChart
+            churnRisk30d={customer.churn_risk_30d}
+            churnRisk90d={customer.churn_risk_90d}
+            confidenceInterval={customer.confidence_interval}
+          />
+        </CardContent>
+      </Card>
 
-      <section className="rounded-lg border border-[var(--border)] bg-white p-5">
-        <h2 className="mb-4">Usage history</h2>
-        {usage.length > 0 ? (
-          <UsageChart data={usage} />
-        ) : (
-          <p className="text-base text-[var(--muted)]">No usage events recorded.</p>
-        )}
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle subtitle="Monthly product engagement signals">
+            Usage history
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {usage.length > 0 ? (
+            <UsageChart data={usage} />
+          ) : (
+            <EmptyState
+              title="No usage events"
+              description="Usage telemetry has not been recorded for this account."
+            />
+          )}
+        </CardContent>
+      </Card>
 
-      <section className="rounded-lg border border-[var(--border)] bg-white p-5">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h2>Recommended actions</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle subtitle="Causal estimates ranked for this segment">
+            Recommended actions
+          </CardTitle>
           <Link
             href={appPath(base, "/playbooks")}
-            className="text-base text-[var(--primary)] hover:underline"
+            className="text-xs font-medium text-[var(--accent)] hover:underline"
           >
-            View all playbooks
+            All playbooks →
           </Link>
-        </div>
-        {customer.churn_risk_30d > 0.6 && (
-          <p className="mb-3 text-[13px] text-[var(--danger)]">
-            High churn risk — prioritize interventions below.
-          </p>
-        )}
-        {segmentPlaybooks.length > 0 ? (
-          <ul className="space-y-3">
-            {segmentPlaybooks.map((pb) => (
-              <li
-                key={pb.id}
-                className="rounded-md border border-[var(--border)] px-4 py-3"
-              >
-                <p className="font-medium">{pb.label}</p>
-                <p className="mt-1 text-base text-[var(--muted)]">{pb.action}</p>
-                <p className="mt-2 text-[13px] text-[var(--muted)]">
-                  Observational ATE for {customer.segment}:{" "}
-                  <span
-                    className={
-                      pb.ate > 0 ? "text-[var(--success)]" : "text-[var(--muted)]"
-                    }
-                  >
-                    {pb.ate > 0
-                      ? `${pb.ate.toFixed(1)}pp lower churn`
-                      : `${Math.abs(pb.ate).toFixed(1)}pp higher churn`}
-                  </span>{" "}
-                  (95% CI {pb.confidence_lower.toFixed(1)}–
-                  {pb.confidence_upper.toFixed(1)}, n={pb.sample_size}). Ranked among
-                  playbooks for this segment.
-                </p>
+        </CardHeader>
+        <CardContent>
+          {customer.churn_risk_30d > 0.6 && (
+            <div className="mb-4 rounded-[var(--radius)] border border-[var(--danger)]/20 bg-[var(--danger-muted)] px-3.5 py-2.5 text-xs text-[var(--danger)]">
+              High churn risk — prioritize interventions below.
+            </div>
+          )}
+          {segmentPlaybooks.length > 0 ? (
+            <ul className="space-y-3">
+              {segmentPlaybooks.map((pb) => (
+                <li
+                  key={pb.id}
+                  className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border-subtle)] px-4 py-3.5"
+                >
+                  <p className="text-sm font-medium">{pb.label}</p>
+                  <p className="mt-1 text-caption">{pb.action}</p>
+                  <p className="mt-2 text-xs text-[var(--muted)]">
+                    Observational ATE for {customer.segment}:{" "}
+                    <span
+                      className={
+                        pb.ate > 0 ? "font-medium text-[var(--success)]" : ""
+                      }
+                    >
+                      {pb.ate > 0
+                        ? `${pb.ate.toFixed(1)}pp lower churn`
+                        : `${Math.abs(pb.ate).toFixed(1)}pp higher churn`}
+                    </span>{" "}
+                    (95% CI {pb.confidence_lower.toFixed(1)}–
+                    {pb.confidence_upper.toFixed(1)}, n={pb.sample_size})
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <ul className="space-y-2 text-caption">
+              {customer.churn_risk_30d > 0.6 && (
+                <li>Schedule success outreach within 7 days (high risk).</li>
+              )}
+              {customer.churn_risk_30d >= 0.3 && customer.churn_risk_30d <= 0.6 && (
+                <li>Offer feature training webinar (medium risk).</li>
+              )}
+              {customer.churn_risk_30d < 0.3 && (
+                <li>Maintain standard touchpoints; account is healthy.</li>
+              )}
+              <li>
+                Run{" "}
+                <code className="rounded bg-[var(--border-subtle)] px-1 py-0.5 text-xs">
+                  python scripts/run_causal_pipeline.py --replace
+                </code>{" "}
+                to load segment playbooks.
               </li>
-            ))}
-          </ul>
-        ) : (
-          <ul className="list-inside list-disc space-y-1 text-base text-[var(--muted)]">
-            {customer.churn_risk_30d > 0.6 && (
-              <li>Schedule success outreach within 7 days (high risk).</li>
-            )}
-            {customer.churn_risk_30d >= 0.3 && customer.churn_risk_30d <= 0.6 && (
-              <li>Offer feature training webinar (medium risk).</li>
-            )}
-            {customer.churn_risk_30d < 0.3 && (
-              <li>Maintain standard touchpoints; account is healthy.</li>
-            )}
-            <li>
-              Run{" "}
-              <code className="text-[13px]">
-                python scripts/run_causal_pipeline.py --replace
-              </code>{" "}
-              to load segment playbooks.
-            </li>
-          </ul>
-        )}
-      </section>
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

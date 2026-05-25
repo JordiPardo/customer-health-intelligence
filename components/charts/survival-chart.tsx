@@ -1,6 +1,11 @@
 "use client";
 
 import { PlotlyChart } from "@/components/charts/plotly-chart";
+import {
+  chartFillPrimary,
+  chartLayout,
+  chartLinePrimary,
+} from "@/lib/ui/chart-theme";
 
 /** Approximate survival curve from 30d and 90d churn risk (conditional). */
 export function SurvivalChart({
@@ -40,7 +45,7 @@ export function SurvivalChart({
       : [];
 
   return (
-    <div className="h-64">
+    <div className="h-72 w-full">
       <PlotlyChart
         data={[
           {
@@ -48,23 +53,22 @@ export function SurvivalChart({
             mode: "lines",
             x: times,
             y: survival,
-            line: { color: "#2563eb", width: 2, shape: "spline" },
+            line: { ...chartLinePrimary, shape: "spline" },
             fill: "tozeroy",
-            fillcolor: "rgba(37, 99, 235, 0.08)",
+            fillcolor: chartFillPrimary,
+            hovertemplate: "Day %{x}<br>Retention: %{y:.0%}<extra></extra>",
           },
         ]}
         layout={{
-          margin: { t: 8, r: 16, b: 48, l: 48 },
-          paper_bgcolor: "white",
-          plot_bgcolor: "white",
+          ...chartLayout,
           shapes,
-          xaxis: { title: { text: "Days from now" } },
+          xaxis: { ...chartLayout.xaxis, title: { text: "Days from now" } },
           yaxis: {
+            ...chartLayout.yaxis,
             title: { text: "Retention probability" },
             range: [0, 1],
             tickformat: ".0%",
           },
-          font: { family: "system-ui, sans-serif", size: 12 },
         }}
       />
     </div>

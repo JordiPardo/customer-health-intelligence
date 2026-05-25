@@ -42,12 +42,12 @@ Optional after first deploy:
 In [Supabase Dashboard](https://supabase.com/dashboard) → your project → **Authentication** → **URL configuration**:
 
 1. **Site URL** — set to your Vercel URL, e.g.  
-   `https://customer-health-intelligence.vercel.app`
+   `https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app`
 
 2. **Redirect URLs** — add (replace with your real host):
 
    ```
-   https://customer-health-intelligence.vercel.app/**
+   https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/**
    https://customer-health-intelligence-*.vercel.app/**
    http://localhost:3000/**
    ```
@@ -74,6 +74,19 @@ After deploy:
 5. `/playbooks` — 12 causal estimate rows
 6. Sign out and confirm `/dashboard` redirects to `/login`
 
+## 6. Verify you deployed **this** repo
+
+The docs example `customer-health-intelligence.vercel.app` may point at a **different** Vercel project. Before debugging auth, confirm production matches this codebase:
+
+| Check | This project (correct) | Wrong / old deploy |
+|--------|----------------------|---------------------|
+| `/` | Public landing with **View demo** | Often redirects straight to `/login` |
+| `/login` | Email + password (Supabase), link “View demo without signing in” | Username + “Demo Credentials” (Acme/Globex) |
+| `/demo/dashboard` | Loads without login (HTTP 200) | Redirects to `/login?callbackUrl=...` |
+| Redirect query param | `?next=` | `?callbackUrl=` |
+
+In Vercel → your project → **Deployments**, open the latest **Production** deploy from `main` and use **that** domain. If the table above shows the wrong column, reconnect GitHub to `JordiPardo/customer-health-intelligence` or create a new Vercel project and redeploy.
+
 ## 7. Vercel Deployment Protection (public demo)
 
 If **incognito** or another device shows **“Log in to Vercel”** (not your app’s `/login`):
@@ -87,6 +100,7 @@ If **incognito** or another device shows **“Log in to Vercel”** (not your ap
 
 | Issue | Fix |
 |--------|-----|
+| View demo → sign in; login shows Acme/Globex users | Wrong Vercel project or stale deploy — see step 6 |
 | Incognito asks for Vercel login | Turn off Deployment Protection for Production (step 7) |
 | Login redirects to localhost | Fix Supabase Site URL + Redirect URLs (step 3) |
 | Dashboard empty / errors | Check all 3 env vars on Vercel; redeploy after adding them |

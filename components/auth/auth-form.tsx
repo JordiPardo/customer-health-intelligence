@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { FieldLabel, Input } from "@/components/ui/input";
 
 type Mode = "login" | "signup";
 
@@ -64,41 +65,35 @@ export function AuthForm({ mode }: { mode: Mode }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="email" className="mb-1 block text-[13px] text-[var(--muted)]">
-          Email
-        </label>
-        <input
+        <FieldLabel htmlFor="email">Email</FieldLabel>
+        <Input
           id="email"
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-base"
           autoComplete="email"
         />
       </div>
       <div>
-        <label
-          htmlFor="password"
-          className="mb-1 block text-[13px] text-[var(--muted)]"
-        >
-          Password
-        </label>
-        <input
+        <FieldLabel htmlFor="password">Password</FieldLabel>
+        <Input
           id="password"
           type="password"
           required
           minLength={6}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border border-[var(--border)] px-3 py-2 text-base"
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
         />
       </div>
       {error && (
-        <p className="text-[13px] text-[var(--danger)]" role="alert">
+        <div
+          className="rounded-[var(--radius)] border border-[var(--danger)]/20 bg-[var(--danger-muted)] px-3 py-2 text-xs text-[var(--danger)]"
+          role="alert"
+        >
           {error}
-        </p>
+        </div>
       )}
       <Button type="submit" className="w-full" disabled={loading}>
         {loading

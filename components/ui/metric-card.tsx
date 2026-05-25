@@ -3,24 +3,35 @@ export function MetricCard({
   value,
   suffix,
   footer,
+  trend,
 }: {
   label: string;
   value: string | number;
   suffix?: string;
   footer?: React.ReactNode;
+  trend?: "neutral" | "positive" | "negative";
 }) {
+  const trendColor =
+    trend === "positive"
+      ? "text-[var(--success)]"
+      : trend === "negative"
+        ? "text-[var(--danger)]"
+        : "";
+
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-white px-5 py-4">
-      <p className="mb-1 text-[13px] text-[var(--muted)]">{label}</p>
-      <p className="text-[24px] font-medium leading-tight text-[var(--foreground)]">
+    <div className="surface-card px-5 py-4">
+      <p className="text-label mb-2">{label}</p>
+      <p
+        className={`text-2xl font-semibold tracking-tight text-[var(--foreground)] ${trendColor}`}
+      >
         {value}
         {suffix && (
-          <span className="ml-1 text-base font-normal text-[var(--muted)]">
+          <span className="ml-1 text-sm font-normal text-[var(--muted)]">
             {suffix}
           </span>
         )}
       </p>
-      {footer && <div className="mt-2">{footer}</div>}
+      {footer && <div className="mt-3">{footer}</div>}
     </div>
   );
 }

@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
-export function SignOutButton() {
+export function SignOutButton({ compact }: { compact?: boolean }) {
   const router = useRouter();
 
   async function handleSignOut() {
@@ -13,13 +14,22 @@ export function SignOutButton() {
     router.refresh();
   }
 
+  if (compact) {
+    return (
+      <Button variant="ghost" size="sm" onClick={handleSignOut}>
+        Sign out
+      </Button>
+    );
+  }
+
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={handleSignOut}
-      className="text-base text-[var(--muted)] hover:text-[var(--foreground)]"
+      className="w-full justify-start px-2.5"
     >
       Sign out
-    </button>
+    </Button>
   );
 }

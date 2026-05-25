@@ -107,7 +107,7 @@ Synthetic data is scoped to demo org `Acme analytics demo` (`00000000-0000-4000-
 ## Live demo
 
 <!-- Replace with your production Vercel URL -->
-**Demo:** https://your-app.vercel.app
+**Demo:** https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/demo/dashboard
 
 **No login:** [View demo](/demo/dashboard) (read-only, synthetic data).  
 **Full app:** sign up to explore the demo org (500 customers, survival predictions, playbooks).

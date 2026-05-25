@@ -1,6 +1,10 @@
 "use client";
 
 import { PlotlyChart } from "@/components/charts/plotly-chart";
+import {
+  chartLayout,
+  chartLinePrimary,
+} from "@/lib/ui/chart-theme";
 
 export function CohortTrendChart({
   data,
@@ -8,7 +12,7 @@ export function CohortTrendChart({
   data: { cohort: string; churnRate: number }[];
 }) {
   return (
-    <div className="h-64">
+    <div className="h-72 w-full">
       <PlotlyChart
         data={[
           {
@@ -16,17 +20,23 @@ export function CohortTrendChart({
             mode: "lines+markers",
             x: data.map((d) => d.cohort),
             y: data.map((d) => Math.round(d.churnRate * 1000) / 10),
-            line: { color: "#2563eb", width: 2 },
-            marker: { size: 6 },
+            line: chartLinePrimary,
+            marker: { size: 5, color: "#2563eb" },
+            hovertemplate: "%{x}<br>Churn: %{y:.1f}%<extra></extra>",
           },
         ]}
         layout={{
-          margin: { t: 8, r: 16, b: 48, l: 48 },
-          paper_bgcolor: "white",
-          plot_bgcolor: "white",
-          xaxis: { title: { text: "Cohort" }, tickangle: -45 },
-          yaxis: { title: { text: "Churn rate (%)" }, rangemode: "tozero" },
-          font: { family: "system-ui, sans-serif", size: 12 },
+          ...chartLayout,
+          xaxis: {
+            ...chartLayout.xaxis,
+            title: { text: "Cohort" },
+            tickangle: -35,
+          },
+          yaxis: {
+            ...chartLayout.yaxis,
+            title: { text: "Churn rate (%)" },
+            rangemode: "tozero",
+          },
         }}
       />
     </div>
