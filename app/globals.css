@@ -19,11 +19,17 @@
   --success-muted: #f0fdf4;
   --warning: #d97706;
   --warning-muted: #fffbeb;
+  --ai: #7c3aed;
+  --ai-strong: #6d28d9;
+  --ai-muted: #f5f3ff;
+  --ai-border: #ddd6fe;
   --ring: #a1a1aa;
   --radius: 0.5rem;
   --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
   --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-raised: 0 6px 20px -6px rgb(0 0 0 / 0.12), 0 2px 6px -2px rgb(0 0 0 / 0.06);
   --shadow-preview: 0 8px 30px rgb(0 0 0 / 0.08), 0 2px 8px rgb(0 0 0 / 0.04);
   --shadow-preview-hover: 0 12px 40px rgb(0 0 0 / 0.1), 0 4px 12px rgb(0 0 0 / 0.05);
   --surface-muted: #f4f4f5;
@@ -142,5 +148,119 @@
 
   .table-shell tbody tr:hover {
     background: var(--border-subtle);
+  }
+
+  /* ---- Display typography for dominant figures ---- */
+  .text-display {
+    font-size: 2.25rem;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    color: var(--foreground);
+  }
+
+  @media (min-width: 1024px) {
+    .text-display {
+      font-size: 2.75rem;
+    }
+  }
+
+  .text-stat {
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    color: var(--foreground);
+  }
+
+  /* ---- Elevated portfolio hero surface ---- */
+  .hero-surface {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(130% 130% at 0% 0%, #ffffff 0%, #fbfbfc 48%, #f4f4f6 100%);
+    box-shadow: var(--shadow-raised);
+  }
+
+  /* ---- Compact secondary stat tile ---- */
+  .stat-tile {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .stat-tile:hover {
+    border-color: #d4d4d8;
+    box-shadow: var(--shadow-card);
+    transform: translateY(-1px);
+  }
+
+  /* ---- Premium AI Copilot panel ---- */
+  .ai-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--ai-border);
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(180deg, var(--ai-muted) 0%, #ffffff 42%);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.05), 0 8px 24px -12px rgb(124 58 237 / 0.25);
+  }
+
+  .ai-panel::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ai) 0%, #a78bfa 50%, transparent 100%);
+  }
+
+  .ai-orb {
+    background: linear-gradient(140deg, var(--ai) 0%, var(--ai-strong) 100%);
+    box-shadow: 0 4px 14px -4px rgb(124 58 237 / 0.5);
+  }
+
+  /* ---- Subtle hover lift for interactive cards ---- */
+  .lift-on-hover {
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  }
+
+  .lift-on-hover:hover {
+    border-color: #d4d4d8;
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-2px);
+  }
+}
+
+/* ---- Subtle entrance motion ---- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+  .lift-on-hover:hover,
+  .stat-tile:hover {
+    transform: none;
   }
 }

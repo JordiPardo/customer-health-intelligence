@@ -3,12 +3,18 @@ import type { ReactNode } from "react";
 export function Card({
   children,
   className = "",
+  interactive = false,
 }: {
   children: ReactNode;
   className?: string;
+  interactive?: boolean;
 }) {
   return (
-    <section className={`surface-card ${className}`.trim()}>{children}</section>
+    <section
+      className={`surface-card ${interactive ? "lift-on-hover" : ""} ${className}`.trim()}
+    >
+      {children}
+    </section>
   );
 }
 

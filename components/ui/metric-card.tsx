@@ -5,6 +5,7 @@ export function MetricCard({
   footer,
   trend,
   hint,
+  accent,
 }: {
   label: string;
   value: string | number;
@@ -12,6 +13,7 @@ export function MetricCard({
   footer?: React.ReactNode;
   trend?: "neutral" | "positive" | "negative";
   hint?: string;
+  accent?: "danger" | "success" | "accent";
 }) {
   const trendColor =
     trend === "positive"
@@ -20,8 +22,23 @@ export function MetricCard({
         ? "text-[var(--danger)]"
         : "";
 
+  const accentBar =
+    accent === "danger"
+      ? "before:bg-[var(--danger)]"
+      : accent === "success"
+        ? "before:bg-[var(--success)]"
+        : accent === "accent"
+          ? "before:bg-[var(--accent)]"
+          : "";
+
   return (
-    <div className="surface-card metric-card-hover px-4 py-3.5">
+    <div
+      className={`surface-card lift-on-hover relative overflow-hidden px-4 py-3.5 ${
+        accent
+          ? `before:absolute before:inset-y-0 before:left-0 before:w-[3px] ${accentBar}`
+          : ""
+      }`}
+    >
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <p className="text-label">{label}</p>
         {hint && <span className="text-[10px] text-[var(--muted)]">{hint}</span>}

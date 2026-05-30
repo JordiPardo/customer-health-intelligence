@@ -2,7 +2,27 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+function SparkIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M12 3l1.8 4.9L18.7 9.7l-4.9 1.8L12 16.4l-1.8-4.9L5.3 9.7l4.9-1.8L12 3z"
+        fill="currentColor"
+      />
+      <path
+        d="M18.5 14.5l.8 2.1 2.2.8-2.2.8-.8 2.1-.8-2.1-2.2-.8 2.2-.8.8-2.1z"
+        fill="currentColor"
+        opacity="0.7"
+      />
+    </svg>
+  );
+}
 
 function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -97,15 +117,32 @@ export function RetentionBriefPanel({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle
-          subtitle="LLM summary from survival risk, drivers, and causal playbooks — traced in Langfuse"
-        >
-          AI retention brief
-        </CardTitle>
+    <section className="ai-panel">
+      <div className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
+        <div className="flex items-start gap-3">
+          <span className="ai-orb flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius)] text-white">
+            <SparkIcon className="h-5 w-5" />
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-[var(--foreground)]">AI Copilot</h2>
+              <span className="inline-flex items-center rounded-full border border-[var(--ai-border)] bg-white/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--ai-strong)]">
+                Beta
+              </span>
+            </div>
+            <p className="mt-1 text-caption">
+              Retention brief from survival risk, drivers, and causal playbooks
+              — traced in Langfuse
+            </p>
+          </div>
+        </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={handleGenerate} disabled={loading}>
+          <Button
+            size="sm"
+            onClick={handleGenerate}
+            disabled={loading}
+            className="border-0 bg-[var(--ai)] text-white shadow-[0_2px_8px_-2px_rgb(124_58_237_/_0.5)] hover:bg-[var(--ai-strong)] focus-visible:ring-[var(--ai)]"
+          >
             {loading ? "Generating…" : brief ? "Regenerate" : "Generate brief"}
           </Button>
           {brief && (
@@ -114,21 +151,29 @@ export function RetentionBriefPanel({
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+
+      <div className="border-t border-[var(--ai-border)]/60 px-5 py-4">
         {!brief && !error && !loading && (
           <p className="text-caption">
-            One-click brief for <span className="font-medium">{customerName}</span>{" "}
-            — grounded in account metrics already on this page. Requires OpenAI +
-            Langfuse env vars on the server.
+            One-click brief for{" "}
+            <span className="font-medium text-[var(--foreground)]">
+              {customerName}
+            </span>{" "}
+            — grounded in the account metrics already on this page. Requires
+            OpenAI + Langfuse env vars on the server.
           </p>
         )}
 
         {loading && (
-          <div className="space-y-2">
-            <div className="h-3 w-full animate-pulse rounded bg-[var(--border)]" />
-            <div className="h-3 w-5/6 animate-pulse rounded bg-[var(--border)]" />
-            <div className="h-3 w-4/6 animate-pulse rounded bg-[var(--border)]" />
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-[var(--ai-strong)]">
+              <SparkIcon className="h-3.5 w-3.5 animate-pulse" />
+              Analyzing account signals…
+            </div>
+            <div className="h-3 w-full animate-pulse rounded bg-[var(--ai-muted)]" />
+            <div className="h-3 w-5/6 animate-pulse rounded bg-[var(--ai-muted)]" />
+            <div className="h-3 w-4/6 animate-pulse rounded bg-[var(--ai-muted)]" />
           </div>
         )}
 
@@ -138,15 +183,17 @@ export function RetentionBriefPanel({
           </div>
         )}
 
-        {brief && !loading && <BriefMarkdown content={brief} />}
-
-        {brief && (
-          <p className="mt-4 text-[11px] text-[var(--muted)]">
-            Assistive AI — verify against model scores and experiment results before
-            customer outreach.
-          </p>
+        {brief && !loading && (
+          <div className="animate-fade-up">
+            <BriefMarkdown content={brief} />
+            <p className="mt-4 flex items-center gap-1.5 text-[11px] text-[var(--muted)]">
+              <SparkIcon className="h-3 w-3 text-[var(--ai)]" />
+              Assistive AI — verify against model scores and experiment results
+              before customer outreach.
+            </p>
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  AccountHealthSummary,
+  AccountHealthHero,
   CustomerTimeline,
   RiskDriversList,
 } from "@/components/customers/account-health-panel";
@@ -10,8 +10,7 @@ import { SurvivalChart } from "@/components/charts/survival-chart";
 import { UsageChart } from "@/components/charts/usage-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
-import { MetricCard } from "@/components/ui/metric-card";
+import { PageToolbar } from "@/components/app/page-toolbar";
 import { RiskBadge } from "@/components/ui/risk-badge";
 import { PlaybookRecommendationBadge } from "@/components/ui/recommendation-badge";
 import { appPath, type AppBase } from "@/lib/app-path";
@@ -31,7 +30,6 @@ import {
   getCustomerUsage,
 } from "@/lib/queries/customers";
 import { getTopPlaybooksForSegment } from "@/lib/queries/playbooks";
-import { getRiskLevel, riskLabel } from "@/lib/risk";
 
 export async function CustomerDetailView({
   id,
@@ -65,27 +63,12 @@ export async function CustomerDetailView({
   });
   const timeline = buildTimelineEvents(payments, support, usage);
   const uncertainty = confidenceSummary(customer);
-  const riskLevel = getRiskLevel(customer.churn_risk_30d);
 
   return (
     <div className="space-y-6">
       <PageToolbar
         title={customer.name}
-        description={`${customer.segment} · ${customer.plan_tier} · ${customer.industry}`}
         badge={<RiskBadge score={customer.churn_risk_30d} />}
-        meta={
-          <>
-            <StatusBadge>${customer.mrr.toLocaleString()} MRR</StatusBadge>
-            <StatusBadge>{customer.cohort_month} cohort</StatusBadge>
-            <StatusBadge>
-              Signed up{" "}
-              {new Date(customer.signup_date).toLocaleDateString("en-US", {
-                month: "short",
-                year: "numeric",
-              })}
-            </StatusBadge>
-          </>
-        }
         actions={
           <Link
             href={appPath(base, "/customers")}
@@ -96,7 +79,38 @@ export async function CustomerDetailView({
         }
       />
 
-      <AccountHealthSummary customer={customer} />
+      <AccountHealthHero customer={customer} />
+
+      <div
+        className="grid animate-fade-up gap-3 sm:grid-cols-3"
+        style={{ animationDelay: "60ms" }}
+      >
+        <div className="stat-tile px-4 py-3.5">
+          <p className="text-label">90-day churn risk</p>
+          <p className="mt-1.5 text-stat">
+            {(customer.churn_risk_90d * 100).toFixed(0)}%
+          </p>
+          <p className="mt-1 text-caption">Longer-horizon Cox estimate</p>
+        </div>
+        <div className="stat-tile px-4 py-3.5">
+          <p className="text-label">Est. days to churn</p>
+          <p className="mt-1.5 text-stat">
+            {customer.median_days_to_churn ?? "—"}
+          </p>
+          <p className="mt-1 text-caption">Median survival time</p>
+        </div>
+        <div className="stat-tile px-4 py-3.5">
+          <p className="text-label">Active risk drivers</p>
+          <p
+            className={`mt-1.5 text-stat ${
+              riskDrivers.length > 0 ? "text-[var(--warning)]" : ""
+            }`}
+          >
+            {riskDrivers.length}
+          </p>
+          <p className="mt-1 text-caption">Signals flagged below</p>
+        </div>
+      </div>
 
       <RetentionBriefPanel
         customerId={customer.id}
@@ -104,31 +118,11 @@ export async function CustomerDetailView({
         isDemo={base === "/demo"}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          label="30-day churn risk"
-          value={`${(customer.churn_risk_30d * 100).toFixed(0)}%`}
-          trend={customer.churn_risk_30d > 0.6 ? "negative" : "neutral"}
-          hint={riskLabel(riskLevel)}
-        />
-        <MetricCard
-          label="90-day churn risk"
-          value={`${(customer.churn_risk_90d * 100).toFixed(0)}%`}
-        />
-        <MetricCard
-          label="Est. days to churn"
-          value={customer.median_days_to_churn ?? "—"}
-          hint="median (Cox)"
-        />
-        <MetricCard
-          label="MRR"
-          value={`$${customer.mrr.toLocaleString()}`}
-          hint={customer.segment}
-        />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+      <div
+        className="grid animate-fade-up gap-4 lg:grid-cols-2"
+        style={{ animationDelay: "120ms" }}
+      >
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle="Signals driving the current risk band">
               Key risk drivers
@@ -139,7 +133,7 @@ export async function CustomerDetailView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle={uncertainty.detail}>
               Confidence & uncertainty
@@ -179,7 +173,7 @@ export async function CustomerDetailView({
         </Card>
       </div>
 
-      <Card>
+      <Card interactive>
         <CardHeader>
           <CardTitle
             subtitle="Estimated retention from Cox model, conditional on current tenure"
@@ -197,7 +191,7 @@ export async function CustomerDetailView({
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle="Monthly product engagement signals">
               Usage history
@@ -215,7 +209,7 @@ export async function CustomerDetailView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle="Billing, support, and usage milestones">
               Account timeline
@@ -227,7 +221,7 @@ export async function CustomerDetailView({
         </Card>
       </div>
 
-      <Card>
+      <Card interactive>
         <CardHeader>
           <CardTitle subtitle="Causal estimates ranked for this segment — harmful treatments excluded">
             Recommended retention actions

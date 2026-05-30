@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { AtRiskPanel } from "@/components/dashboard/at-risk-panel";
+import { PortfolioHealth } from "@/components/dashboard/portfolio-health";
 import { RiskDistribution } from "@/components/dashboard/risk-distribution";
 import { SegmentBreakdown } from "@/components/dashboard/segment-breakdown";
 import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
 import { CohortTrendChart } from "@/components/charts/cohort-trend-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { MetricCard } from "@/components/ui/metric-card";
-import { RiskBadgeLevel } from "@/components/ui/risk-badge";
 import { appPath, type AppBase } from "@/lib/app-path";
 import { getDashboardStats } from "@/lib/queries/dashboard";
 import { getCustomers } from "@/lib/queries/customers";
@@ -52,6 +51,24 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
   const segmentBreakdown = buildSegmentBreakdown(customers);
   const isDemo = base === "/demo";
 
+  const totalMrr = customers.reduce((sum, c) => sum + c.mrr, 0);
+  const highRiskCustomers = customers.filter(
+    (c) => getRiskLevel(c.churn_risk_30d) === "high",
+  );
+  const atRiskMrr = highRiskCustomers.reduce((sum, c) => sum + c.mrr, 0);
+  const avgRisk =
+    customers.length > 0
+      ? Math.round(
+          (customers.reduce((sum, c) => sum + c.churn_risk_30d, 0) /
+            customers.length) *
+            100,
+        )
+      : 0;
+  const needsAttention = customers.filter(
+    (c) => getRiskLevel(c.churn_risk_30d) !== "low",
+  ).length;
+  const healthyAccounts = customers.length - needsAttention;
+
   return (
     <div className="space-y-6">
       <PageToolbar
@@ -83,29 +100,47 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          label="Total customers"
-          value={stats.totalCustomers}
-          hint="Active in portfolio"
-        />
-        <MetricCard
-          label="High risk"
-          value={`${stats.highRiskPct}%`}
-          trend={stats.highRiskPct > 20 ? "negative" : "neutral"}
-          footer={<RiskBadgeLevel level="high" />}
-          hint={`>${Math.round(stats.totalCustomers * (stats.highRiskPct / 100))} accounts`}
-        />
-        <MetricCard label="Medium risk" value={`${stats.mediumRiskPct}%`} />
-        <MetricCard
-          label="Low risk"
-          value={`${stats.lowRiskPct}%`}
-          trend="positive"
-        />
+      <PortfolioHealth
+        base={base}
+        totalMrr={totalMrr}
+        atRiskMrr={atRiskMrr}
+        atRiskCount={highRiskCustomers.length}
+        totalCustomers={stats.totalCustomers}
+        highPct={stats.highRiskPct}
+        mediumPct={stats.mediumRiskPct}
+        lowPct={stats.lowRiskPct}
+      />
+
+      <div
+        className="grid animate-fade-up gap-3 sm:grid-cols-3"
+        style={{ animationDelay: "60ms" }}
+      >
+        <div className="stat-tile px-4 py-3.5">
+          <p className="text-label">Avg 30-day risk</p>
+          <p className="mt-1.5 text-stat">{avgRisk}%</p>
+          <p className="mt-1 text-caption">Portfolio-wide mean</p>
+        </div>
+        <div className="stat-tile px-4 py-3.5">
+          <p className="text-label">Needs attention</p>
+          <p className="mt-1.5 text-stat text-[var(--warning)]">
+            {needsAttention}
+          </p>
+          <p className="mt-1 text-caption">High or medium risk accounts</p>
+        </div>
+        <div className="stat-tile px-4 py-3.5">
+          <p className="text-label">Healthy accounts</p>
+          <p className="mt-1.5 text-stat text-[var(--success)]">
+            {healthyAccounts}
+          </p>
+          <p className="mt-1 text-caption">Low-risk, stable cadence</p>
+        </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div
+        className="grid animate-fade-up gap-4 lg:grid-cols-3"
+        style={{ animationDelay: "120ms" }}
+      >
+        <Card className="lg:col-span-2" interactive>
           <CardHeader>
             <CardTitle subtitle="Monthly churn rate by customer cohort">
               Cohort churn trend
@@ -123,7 +158,7 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle="Share of portfolio by risk band">
               Risk distribution
@@ -143,8 +178,11 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
+      <div
+        className="grid animate-fade-up gap-4 lg:grid-cols-3"
+        style={{ animationDelay: "180ms" }}
+      >
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle="Top accounts by 30-day churn probability">
               At-risk accounts
@@ -161,7 +199,7 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2" interactive>
           <CardHeader>
             <CardTitle subtitle="Deviations from expected cohort performance">
               Recent anomalies
