@@ -73,7 +73,8 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
     <div className="space-y-6">
       <PageToolbar
         title="Dashboard"
-        description="Portfolio health overview from Cox survival predictions."
+        question="How healthy is my portfolio?"
+        description="Revenue-weighted churn risk across every account, predicted by a Cox survival model."
         badge={
           isDemo ? (
             <StatusBadge variant="warning">Demo workspace</StatusBadge>
@@ -83,7 +84,7 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
         }
         meta={
           <>
-            <StatusBadge>500 accounts</StatusBadge>
+            <StatusBadge>{stats.totalCustomers} accounts</StatusBadge>
             <StatusBadge>30-day window</StatusBadge>
             <span className="text-xs text-[var(--muted)]">
               Model: Cox PH · Updated today

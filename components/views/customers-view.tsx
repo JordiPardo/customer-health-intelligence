@@ -23,7 +23,8 @@ export async function CustomersView({ base = "" }: { base?: AppBase }) {
     <div className="space-y-5">
       <PageToolbar
         title="Customers"
-        description="Search and sort accounts by churn risk, MRR, and segment."
+        question="Which accounts need attention right now?"
+        description="Every account ranked by churn risk and revenue exposure — triage the portfolio in one view."
         meta={
           <>
             <StatusBadge>{customers.length} accounts</StatusBadge>

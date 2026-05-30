@@ -68,6 +68,7 @@ export async function CustomerDetailView({
     <div className="space-y-6">
       <PageToolbar
         title={customer.name}
+        question="Why is this account at risk — and what should you do about it?"
         badge={<RiskBadge score={customer.churn_risk_30d} />}
         actions={
           <Link

@@ -2,12 +2,14 @@ import type { ReactNode } from "react";
 
 export function PageToolbar({
   title,
+  question,
   description,
   badge,
   meta,
   actions,
 }: {
   title: string;
+  question?: string;
   description?: string;
   badge?: ReactNode;
   meta?: ReactNode;
@@ -20,10 +22,15 @@ export function PageToolbar({
           <h1 className="text-page-title">{title}</h1>
           {badge}
         </div>
+        {question && (
+          <p className="mt-2 max-w-2xl text-[0.9375rem] font-medium leading-snug text-[var(--foreground)]">
+            {question}
+          </p>
+        )}
         {description && (
           <p className="mt-1 max-w-2xl text-caption">{description}</p>
         )}
-        {meta && <div className="mt-2 flex flex-wrap items-center gap-2">{meta}</div>}
+        {meta && <div className="mt-3 flex flex-wrap items-center gap-2">{meta}</div>}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>

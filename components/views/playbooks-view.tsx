@@ -27,7 +27,8 @@ export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
     <div className="space-y-6">
       <PageToolbar
         title="Retention playbooks"
-        description="Observational causal estimates by segment. Positive ATE = lower churn. Harmful treatments are flagged, not ranked as recommendations."
+        question="Which interventions actually reduce churn?"
+        description="Causal effect estimates by segment, with harmful treatments flagged. Validate the promising ones with experiments before rollout."
         meta={
           <>
             <StatusBadge>{playbooks.length} estimates</StatusBadge>

@@ -16,7 +16,8 @@ export async function ExperimentsView({ base = "" }: { base?: AppBase }) {
     <div className="space-y-6">
       <PageToolbar
         title="Experiments"
-        description="Randomized A/B tests that validate retention playbooks. Executive summary cards plus detailed comparison table."
+        question="Which actions have proven, measurable impact?"
+        description="Randomized A/B tests that validate retention playbooks with statistical confidence — not just correlation."
         meta={
           <>
             <StatusBadge>{experiments.length} total</StatusBadge>

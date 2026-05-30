@@ -131,8 +131,8 @@ export function RetentionBriefPanel({
               </span>
             </div>
             <p className="mt-1 text-caption">
-              Retention brief from survival risk, drivers, and causal playbooks
-              — traced in Langfuse
+              Your AI retention analyst — reads every signal on this account and
+              recommends the next move.
             </p>
           </div>
         </div>
@@ -155,12 +155,12 @@ export function RetentionBriefPanel({
       <div className="border-t border-[var(--ai-border)]/60 px-5 py-4">
         {!brief && !error && !loading && (
           <p className="text-caption">
-            One-click brief for{" "}
+            Generate an executive-ready retention brief for{" "}
             <span className="font-medium text-[var(--foreground)]">
               {customerName}
             </span>{" "}
-            — grounded in the account metrics already on this page. Requires
-            OpenAI + Langfuse env vars on the server.
+            — the risk, the drivers behind it, and the recommended play, written
+            from the live account data on this page.
           </p>
         )}
 
