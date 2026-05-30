@@ -151,8 +151,21 @@ npm run test:install && npm test
 | Cohort alerts | Expected vs observed churn | Anomaly flags on dashboard |
 | Playbooks | OLS-adjusted ATE + bootstrap CI | Segment-ranked interventions |
 | Validation | Randomized A/B | Uplift, p-value, roll-out decision |
+| **AI brief** | GPT-4o-mini + Langfuse tracing | CS-ready account summary on customer detail |
 
 Full write-up: **[docs/METHODOLOGY.md](docs/METHODOLOGY.md)** · Public page: **`/methodology`**
+
+### AI retention brief (Langfuse)
+
+On any customer detail page, **Generate brief** calls `POST /api/ai/retention-brief` with structured account context (risk, drivers, playbooks). Responses are traced in [Langfuse](https://langfuse.com) with `customerId`, segment, and risk band metadata.
+
+Required server env vars (local + Vercel):
+
+```env
+OPENAI_API_KEY=
+LANGFUSE_PUBLIC_KEY=
+LANGFUSE_SECRET_KEY=
+```
 
 ---
 

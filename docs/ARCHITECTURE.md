@@ -69,6 +69,14 @@ Migrations live in `supabase/migrations/`.
 
 Pipelines run **locally** (or via future CI); Vercel serves the UI only.
 
+## AI layer
+
+| Route | Purpose |
+|-------|---------|
+| `POST /api/ai/retention-brief` | LLM summary from customer context |
+
+Uses **OpenAI** (`gpt-4o-mini`) with **Langfuse** traces (`retention-brief` tag). Keys are server-only. Works on authenticated and `/demo/customers/[id]` routes when env vars are set.
+
 ## Deployment
 
 - **Vercel** — Next.js app, env vars for Supabase keys

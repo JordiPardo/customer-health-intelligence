@@ -5,6 +5,7 @@ import {
   CustomerTimeline,
   RiskDriversList,
 } from "@/components/customers/account-health-panel";
+import { RetentionBriefPanel } from "@/components/customers/retention-brief-panel";
 import { SurvivalChart } from "@/components/charts/survival-chart";
 import { UsageChart } from "@/components/charts/usage-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,6 +97,12 @@ export async function CustomerDetailView({
       />
 
       <AccountHealthSummary customer={customer} />
+
+      <RetentionBriefPanel
+        customerId={customer.id}
+        customerName={customer.name}
+        isDemo={base === "/demo"}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
