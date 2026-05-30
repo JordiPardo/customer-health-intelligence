@@ -110,3 +110,35 @@ export async function getCustomerUsage(
     a.month.localeCompare(b.month),
   );
 }
+
+export async function getCustomerPayments(customerId: string) {
+  const supabase = getDemoDb();
+  const { data } = await supabase
+    .from("payment_events")
+    .select("event_date, event_type, amount")
+    .eq("customer_id", customerId)
+    .order("event_date", { ascending: false })
+    .limit(20);
+
+  return (data ?? []).map((row) => ({
+    event_date: String(row.event_date),
+    event_type: String(row.event_type),
+    amount: Number(row.amount),
+  }));
+}
+
+export async function getCustomerSupport(customerId: string) {
+  const supabase = getDemoDb();
+  const { data } = await supabase
+    .from("support_sentiment")
+    .select("ticket_date, sentiment, category")
+    .eq("customer_id", customerId)
+    .order("ticket_date", { ascending: false })
+    .limit(20);
+
+  return (data ?? []).map((row) => ({
+    ticket_date: String(row.ticket_date),
+    sentiment: String(row.sentiment),
+    category: String(row.category),
+  }));
+}

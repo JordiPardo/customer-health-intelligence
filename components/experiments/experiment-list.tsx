@@ -1,21 +1,8 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/app/page-toolbar";
+import { ExperimentRecommendationBadge } from "@/components/ui/recommendation-badge";
 import { appPath, type AppBase } from "@/lib/app-path";
-import type { ExperimentRow } from "@/lib/types";
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function significanceLabel(p: number) {
-  if (p < 0.05) return "Significant";
-  if (p < 0.1) return "Marginal";
-  return "Not significant";
-}
+import { experimentRecommendation, significanceLabel } from "@/lib/experiment-recommendation";
 
 export function ExperimentList({
   experiments,
@@ -36,10 +23,13 @@ export function ExperimentList({
               <th className="px-5 py-3">Sample</th>
               <th className="px-5 py-3">Uplift</th>
               <th className="px-5 py-3">Significance</th>
+              <th className="px-5 py-3">Decision</th>
             </tr>
           </thead>
           <tbody>
-            {experiments.map((exp) => (
+            {experiments.map((exp) => {
+              const rec = experimentRecommendation(exp.status, exp.result);
+              return (
               <tr
                 key={exp.id}
                 className="border-b border-[var(--border)] last:border-0"
@@ -95,8 +85,12 @@ export function ExperimentList({
                     <span className="text-[var(--muted)]">In progress</span>
                   )}
                 </td>
+                <td className="px-5 py-3.5">
+                  <ExperimentRecommendationBadge recommendation={rec} />
+                </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>
@@ -136,4 +130,10 @@ export function ExperimentChurnComparison({
   );
 }
 
-export { formatDate, significanceLabel };
+export function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}

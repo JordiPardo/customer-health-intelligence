@@ -1,139 +1,207 @@
-# Customer health intelligence
+# Customer Health Intelligence
 
-SaaS operations intelligence platform that predicts **when** customers will churn, explains **why** with causal inference, and tracks intervention effectiveness.
+**Portfolio-grade B2B SaaS demo** — predict *when* customers will churn, explain *why* with causal playbooks, and validate interventions with A/B experiments.
+
+Built to demonstrate product thinking, analytics depth, and clean full-stack engineering for recruiters and hiring managers.
+
+---
+
+## Live demo
+
+| Link | Description |
+|------|-------------|
+| [**View demo (no login)**](https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/demo/dashboard) | Read-only dashboard, customers, playbooks, experiments |
+| [Methodology case study](https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/methodology) | Business problem, ML approach, limitations |
+| [Sign up](https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/signup) | Explore full app with demo org data |
+
+> Replace URLs above with your custom domain when configured (e.g. `retenzapp.com`).
+
+### Screenshots
+
+<!-- Add to docs/screenshots/ and embed when ready -->
+| Dashboard | Customer detail |
+|-----------|-----------------|
+| *`docs/screenshots/dashboard.png`* | *`docs/screenshots/customer-detail.png`* |
+
+---
+
+## What this demonstrates
+
+- **Product sense** — CS/revenue workflow: risk scoring → drivers → playbook → experiment validation
+- **ML literacy** — Cox survival (not just classification), observational causal ATE, A/B testing
+- **Full-stack delivery** — Next.js App Router, Supabase, Python pipelines, Vercel deploy
+- **Engineering hygiene** — TypeScript, lint/typecheck CI, Playwright smoke tests, migration scripts
+
+---
 
 ## Stack
 
-- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS
-- **Backend:** Supabase (PostgreSQL, Auth, RLS)
-- **ML:** Python (pandas, lifelines, scikit-learn)
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 16, React 19, TypeScript, Tailwind CSS v4 |
+| Backend | Supabase (PostgreSQL, Auth, RLS) |
+| Charts | Plotly.js |
+| ML | Python — pandas, lifelines, scikit-learn |
+| Deploy | Vercel + Supabase Cloud |
 
-## Security
+---
 
-- Copy `.env.example` to `.env.local` and add your own Supabase keys locally.
-- **Never commit** `.env.local`, database passwords, or service role keys.
-- Use a **private** GitHub repo if you prefer; this project is designed to run against your own Supabase project.
+## Architecture
+
+```
+Landing / Methodology (public)
+        ↓
+Demo (/demo/*) — no auth, read-only
+        ↓
+Authenticated app — dashboard, customers, playbooks, experiments
+        ↓
+Supabase PostgreSQL ← Python ML pipelines (local)
+```
+
+See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for details.
+
+---
+
+## Project structure
+
+```
+app/
+  (public)/          Landing, login, signup, methodology
+  (auth)/              Authenticated app routes
+  demo/                Public read-only mirror of app
+components/
+  views/               Page-level server components
+  charts/              Plotly visualizations
+  ui/                  Design system primitives
+lib/
+  queries/             Supabase data access
+  playbook-recommendation.ts
+  experiment-recommendation.ts
+  customer-health.ts   Risk drivers, timeline
+ml/                    Cox survival, causal ATE, feature engineering
+scripts/               Data generation, seeding, pipelines
+supabase/migrations/   SQL schema
+tests/                 Playwright smoke tests
+docs/                  Architecture, methodology, deployment
+```
+
+---
 
 ## Quick start
 
-### 1. Environment variables
+### 1. Environment
 
 ```bash
 cp .env.example .env.local
 ```
 
-Fill in from [Supabase](https://supabase.com/dashboard) → Project Settings → API:
+Fill from Supabase → **Project Settings → API**:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-### 2. Database schema
+### 2. Database
 
-In Supabase → **SQL Editor**, paste and run:
+Run in Supabase **SQL Editor** (in order if fresh):
 
-`supabase/migrations/001_initial_schema.sql`
+1. `supabase/migrations/001_initial_schema.sql`
+2. `supabase/migrations/003_experiments_metadata.sql`
 
-### 3. Install and run the app
+If a partial migration failed, use `000_reset_dev_schema.sql` first.
+
+### 3. Install & run app
 
 ```bash
-npm install   # or pnpm install if pnpm works on your machine
+npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### 4. Python environment and synthetic data
+### 4. Python + data
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
 python scripts/generate_synthetic_data.py
-python scripts/seed_supabase.py --postgres
-```
-
-### 5. Train survival model (Phase 2)
-
-```bash
+python scripts/seed_supabase.py          # or --postgres if REST cache stale
 python scripts/run_ml_pipeline.py --replace
-```
-
-This trains a **Cox proportional hazards** model on your seeded data and writes 500 rows to `survival_predictions`. Outputs also saved to `data/synthetic/survival_predictions.csv`.
-
-Explore interactively: `notebooks/01_survival_analysis.ipynb`
-
-### 6. Causal playbooks (Phase 4)
-
-```bash
 python scripts/run_causal_pipeline.py --replace
-```
-
-Estimates average treatment effects (OLS-adjusted + bootstrap) per retention playbook and segment, then writes to `causal_estimates`. Outputs also saved to `data/synthetic/causal_estimates.csv`.
-
-### 7. A/B experiments (Phase 5)
-
-In Supabase → **SQL Editor**, run `supabase/migrations/003_experiments_metadata.sql` (once).
-
-```bash
 python scripts/run_experiments_pipeline.py --replace
 ```
 
-Seeds randomized experiments with treatment/control assignments and results for the demo org. Outputs also saved to `data/synthetic/experiments.csv`.
-
-### 8. Run the app (Phase 3–5)
+### 5. Quality checks
 
 ```bash
-npm run dev
+npm run lint
+npm run typecheck
+npm run build
+npm run test:install && npm test
 ```
 
-- Landing: http://localhost:3000
-- Sign up: http://localhost:3000/signup (adds you to the demo org via DB trigger)
-- Dashboard: http://localhost:3000/dashboard
-- Playbooks: http://localhost:3000/playbooks
-- Experiments: http://localhost:3000/experiments
+---
 
-In Supabase → **Authentication → Providers**, ensure **Email** is enabled. For local dev, you can disable **Confirm email** under Email settings so sign-up works instantly.
+## ML methodology (summary)
 
-## Project structure
+| Stage | Method | Output |
+|-------|--------|--------|
+| Risk timing | Cox proportional hazards | 30d/90d risk, days-to-churn, CIs |
+| Cohort alerts | Expected vs observed churn | Anomaly flags on dashboard |
+| Playbooks | OLS-adjusted ATE + bootstrap CI | Segment-ranked interventions |
+| Validation | Randomized A/B | Uplift, p-value, roll-out decision |
 
-```
-app/(public)/     # Landing page
-app/(auth)/       # Authenticated app (Phase 3+)
-app/api/          # API routes
-components/       # React components
-lib/supabase/     # Supabase clients
-ml/               # ML pipeline (feature engineering, Cox survival model)
-notebooks/        # Jupyter notebooks documenting ML process
-scripts/          # Data generation and seeding
-supabase/         # SQL migrations
-data/synthetic/   # Generated CSVs (gitignored)
-```
+Full write-up: **[docs/METHODOLOGY.md](docs/METHODOLOGY.md)** · Public page: **`/methodology`**
 
-## Demo organization
+---
 
-Synthetic data is scoped to demo org `Acme analytics demo` (`00000000-0000-4000-8000-000000000001`). New sign-ups are auto-added to this org via a database trigger (portfolio demo).
+## Database & Supabase
 
-## Live demo
+- **Demo org:** `Acme analytics demo` (`00000000-0000-4000-8000-000000000001`)
+- New sign-ups auto-join demo org via auth trigger
+- RLS enabled on all tables; app uses service role for portfolio demo reads
+- ~500 customers, survival predictions, 12 causal estimates, 4 experiments
 
-<!-- Replace with your production Vercel URL -->
-**Demo:** https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/demo/dashboard
+---
 
-**No login:** [View demo](/demo/dashboard) (read-only, synthetic data).  
-**Full app:** sign up to explore the demo org (500 customers, survival predictions, playbooks).
+## Security
 
-## Deploy (Vercel)
+- Never commit `.env.local` or service role keys
+- Service role key is **server-only** (Vercel env, not client)
+- Use a private GitHub repo if preferred
+- See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production auth URLs
 
-Host the app so it runs without `npm run dev` on your machine. Supabase is already cloud-hosted.
+---
 
-**Guides:** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · [Post-deploy checklist](docs/POST_DEPLOY_CHECKLIST.md)
+## Limitations (honest)
 
-1. Import the GitHub repo on [Vercel](https://vercel.com/new)
-2. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-3. In Supabase → **Authentication** → **URL configuration**, add your Vercel URL and `http://localhost:3000/**` to redirect URLs
-4. Deploy; smoke-test signup, dashboard, customers, playbooks
+- Synthetic data — illustrative, not production-calibrated
+- Observational ATEs can be confounded; experiments required before rollout
+- Single demo tenant — not true multi-tenant isolation yet
+- ML pipelines run manually (no scheduled retraining)
 
-## Development phases
+---
 
-See your project spec for the full 10–12 week roadmap. **Phases 1–5** are in place (foundation, survival ML, auth + dashboard, causal playbooks, A/B experiments). Next: **Phase 6** billing / production hardening.
+## Roadmap
+
+**Next:** custom domain, portfolio screenshots, Stripe billing (Phase 6).
+
+See **[docs/ROADMAP.md](docs/ROADMAP.md)**.
+
+---
+
+## Deploy
+
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) · [Post-deploy checklist](docs/POST_DEPLOY_CHECKLIST.md)
+
+1. Import repo on Vercel
+2. Set three Supabase env vars
+3. Configure Supabase Auth redirect URLs
+4. Smoke-test `/demo/dashboard` in incognito
+
+---
+
+## License
+
+See [LICENSE](LICENSE).

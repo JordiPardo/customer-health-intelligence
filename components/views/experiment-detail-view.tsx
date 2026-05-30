@@ -4,8 +4,13 @@ import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
 import {
   ExperimentChurnComparison,
   formatDate,
-  significanceLabel,
 } from "@/components/experiments/experiment-list";
+import { ExperimentRecommendationBadge } from "@/components/ui/recommendation-badge";
+import {
+  experimentRecommendation,
+  significanceExplanation,
+  significanceLabel,
+} from "@/lib/experiment-recommendation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/ui/metric-card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -29,6 +34,7 @@ export async function ExperimentDetailView({
   const meta = experiment.treatment
     ? PLAYBOOK_META[experiment.treatment]
     : undefined;
+  const rec = experimentRecommendation(experiment.status, experiment.result);
 
   return (
     <div className="space-y-6">
@@ -36,11 +42,14 @@ export async function ExperimentDetailView({
         title={experiment.label}
         description={experiment.description ?? meta?.description ?? experiment.name}
         badge={
-          <StatusBadge
-            variant={experiment.status === "running" ? "warning" : "success"}
-          >
-            {experiment.status === "running" ? "Running" : "Completed"}
-          </StatusBadge>
+          <div className="flex flex-wrap gap-1.5">
+            <StatusBadge
+              variant={experiment.status === "running" ? "warning" : "success"}
+            >
+              {experiment.status === "running" ? "Running" : "Completed"}
+            </StatusBadge>
+            <ExperimentRecommendationBadge recommendation={rec} />
+          </div>
         }
         meta={
           <>
@@ -169,9 +178,15 @@ export async function ExperimentDetailView({
                 estimates — use both signals before scaling interventions.
               </li>
               <li>
-                {experiment.result.p_value < 0.05
-                  ? "Statistically significant at α=0.05 — strong evidence the playbook moved retention in this cohort."
-                  : "Not significant at α=0.05 — consider longer runtime or larger sample before rollout."}
+                {significanceExplanation(experiment.result.p_value)}
+              </li>
+              <li>
+                Recommendation:{" "}
+                {rec === "roll_out"
+                  ? "Roll out to eligible accounts in this segment."
+                  : rec === "stop"
+                    ? "Stop the treatment — control outperformed or matched treatment."
+                    : "Continue testing until sample size and runtime criteria are met."}
               </li>
             </ul>
           </CardContent>

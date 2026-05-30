@@ -50,10 +50,12 @@ export async function getPlaybooksForSegment(
     .sort((a, b) => b.ate - a.ate);
 }
 
-/** Best playbook for a segment: highest estimated churn reduction (ATE). */
 export async function getTopPlaybooksForSegment(
   segment: string,
   limit = 3,
 ): Promise<PlaybookRow[]> {
-  return (await getPlaybooksForSegment(segment)).slice(0, limit);
+  const beneficial = (await getPlaybooksForSegment(segment)).filter(
+    (p) => p.ate > 0,
+  );
+  return beneficial.slice(0, limit);
 }

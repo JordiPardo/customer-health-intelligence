@@ -1,28 +1,13 @@
 import Link from "next/link";
 import { DashboardPreview } from "@/components/landing/dashboard-preview";
 import { LandingSections } from "@/components/landing/landing-sections";
+import { PublicFooter, PublicHeader } from "@/components/landing/public-header";
 import { Button } from "@/components/ui/button";
 
 export function Hero() {
   return (
     <div className="flex min-h-screen flex-col bg-[var(--background)]">
-      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <span className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
-            Customer health
-          </span>
-          <nav className="flex items-center gap-2">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm">Start free trial</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main>
         <section className="relative overflow-hidden border-b border-[var(--border)]">
@@ -54,6 +39,11 @@ export function Hero() {
                   <Button variant="secondary">View demo</Button>
                 </Link>
               </div>
+              <p className="mt-4 text-xs text-[var(--muted)]">
+                <Link href="/methodology" className="text-[var(--accent)] hover:underline">
+                  Read the methodology case study →
+                </Link>
+              </p>
               <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-[var(--muted)]">
                 <span>✓ Cox survival model</span>
                 <span>✓ Cohort anomaly detection</span>
@@ -69,12 +59,7 @@ export function Hero() {
         <LandingSections />
       </main>
 
-      <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-5 text-xs text-[var(--muted)]">
-          <span>Customer health intelligence</span>
-          <span>Portfolio demo · synthetic data</span>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

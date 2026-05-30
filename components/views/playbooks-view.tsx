@@ -3,27 +3,35 @@ import { PlaybookTable } from "@/components/playbooks/playbook-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
+import { PlaybookRecommendationBadge } from "@/components/ui/recommendation-badge";
 import { getPlaybooks } from "@/lib/queries/playbooks";
+import {
+  formatChurnImpact,
+  playbookRecommendation,
+  recommendedPlaybooks,
+} from "@/lib/playbook-recommendation";
 
 import { type AppBase } from "@/lib/app-path";
 
 export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
   const playbooks = await getPlaybooks();
+  const beneficialCount = playbooks.filter((p) => p.ate > 0).length;
 
   const segments = ["SMB", "Mid-Market", "Enterprise"] as const;
   const bySegment = segments.map((segment) => ({
     segment,
-    rows: playbooks.filter((p) => p.segment === segment),
+    rows: recommendedPlaybooks(playbooks.filter((p) => p.segment === segment)),
   }));
 
   return (
     <div className="space-y-6">
       <PageToolbar
         title="Retention playbooks"
-        description="Causal average treatment effects (ATE) by segment from OLS-adjusted observational data."
+        description="Observational causal estimates by segment. Positive ATE = lower churn. Harmful treatments are flagged, not ranked as recommendations."
         meta={
           <>
             <StatusBadge>{playbooks.length} estimates</StatusBadge>
+            <StatusBadge variant="success">{beneficialCount} beneficial</StatusBadge>
             <StatusBadge>3 segments</StatusBadge>
           </>
         }
@@ -37,6 +45,18 @@ export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
         }
       />
 
+      <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-5 py-4 text-caption">
+        <strong className="font-medium text-[var(--foreground)]">
+          How to read ATE:
+        </strong>{" "}
+        Average Treatment Effect is in percentage points of churn.{" "}
+        <span className="text-[var(--success)]">Lower churn (good)</span>{" "}
+        means the treatment group retained better (positive ATE).{" "}
+        <span className="text-[var(--danger)]">Higher churn (bad)</span>{" "}
+        means the treatment hurt retention — do not deploy. Validate promising
+        playbooks with randomized experiments before broad rollout.
+      </div>
+
       {playbooks.length === 0 ? (
         <EmptyState
           title="No causal estimates yet"
@@ -46,7 +66,7 @@ export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
         <>
           <Card>
             <CardHeader>
-              <CardTitle subtitle="All segment × treatment combinations">
+              <CardTitle subtitle="All segment × treatment combinations with recommendation labels">
                 All estimates
               </CardTitle>
             </CardHeader>
@@ -59,40 +79,45 @@ export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
             {bySegment.map(({ segment, rows }) => (
               <Card key={segment}>
                 <CardHeader>
-                  <CardTitle subtitle="Ranked by estimated churn reduction">
-                    {segment}
+                  <CardTitle subtitle="Beneficial treatments only, ranked by impact">
+                    {segment} — top actions
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {rows.length > 0 ? (
                     <ul className="space-y-3">
-                      {rows.map((row, i) => (
-                        <li
-                          key={row.id}
-                          className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border-subtle)] px-3.5 py-3"
-                        >
-                          <div className="flex items-baseline justify-between gap-2">
-                            <span className="text-sm font-medium">
-                              {i + 1}. {row.label}
-                            </span>
-                            <span
-                              className={`shrink-0 text-xs font-medium tabular-nums ${
+                      {rows.map((row, i) => {
+                        const rec = playbookRecommendation(row);
+                        return (
+                          <li
+                            key={row.id}
+                            className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border-subtle)] px-3.5 py-3"
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-sm font-medium">
+                                {i + 1}. {row.label}
+                              </span>
+                              <PlaybookRecommendationBadge recommendation={rec} />
+                            </div>
+                            <p
+                              className={`mt-1 text-xs font-medium tabular-nums ${
                                 row.ate > 0
                                   ? "text-[var(--success)]"
-                                  : "text-[var(--muted)]"
+                                  : "text-[var(--danger)]"
                               }`}
                             >
-                              {row.ate > 0
-                                ? `−${row.ate.toFixed(1)}pp`
-                                : `${row.ate.toFixed(1)}pp`}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-caption">{row.action}</p>
-                        </li>
-                      ))}
+                              {formatChurnImpact(row.ate)}
+                            </p>
+                            <p className="mt-1 text-caption">{row.action}</p>
+                          </li>
+                        );
+                      })}
                     </ul>
                   ) : (
-                    <p className="text-caption">No estimates for this segment.</p>
+                    <p className="text-caption">
+                      No beneficial estimates for this segment — review full table
+                      above.
+                    </p>
                   )}
                 </CardContent>
               </Card>

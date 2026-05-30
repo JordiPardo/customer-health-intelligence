@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { PageToolbar, StatusBadge } from "@/components/app/page-toolbar";
-import {
-  ExperimentList,
-} from "@/components/experiments/experiment-list";
+import { ExperimentCards } from "@/components/experiments/experiment-cards";
+import { ExperimentList } from "@/components/experiments/experiment-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type AppBase } from "@/lib/app-path";
@@ -17,7 +16,7 @@ export async function ExperimentsView({ base = "" }: { base?: AppBase }) {
     <div className="space-y-6">
       <PageToolbar
         title="Experiments"
-        description="Randomized A/B tests that validate retention playbooks against a control group."
+        description="Randomized A/B tests that validate retention playbooks. Executive summary cards plus detailed comparison table."
         meta={
           <>
             <StatusBadge>{experiments.length} total</StatusBadge>
@@ -44,10 +43,12 @@ export async function ExperimentsView({ base = "" }: { base?: AppBase }) {
         />
       ) : (
         <>
+          <ExperimentCards experiments={experiments} base={base} />
+
           <Card>
             <CardHeader>
-              <CardTitle subtitle="Treatment vs. control churn rates and statistical significance">
-                All experiments
+              <CardTitle subtitle="Compact view for comparing all experiments">
+                Summary table
               </CardTitle>
             </CardHeader>
             <CardContent noPadding>
@@ -57,15 +58,22 @@ export async function ExperimentsView({ base = "" }: { base?: AppBase }) {
 
           <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-5 py-4 text-caption">
             <strong className="font-medium text-[var(--foreground)]">
-              How to read results:
+              Decision framework:
             </strong>{" "}
-            Uplift is relative churn reduction in the treatment arm vs. control.
-            p &lt; 0.05 indicates a statistically significant effect. Compare with
-            observational ATEs on the{" "}
-            <Link href={base ? `${base}/playbooks` : "/playbooks"} className="text-[var(--accent)] hover:underline">
+            <span className="text-[var(--success)]">Roll out</span> when uplift is
+            positive and p &lt; 0.05.{" "}
+            <span className="text-[var(--warning)]">Continue testing</span> when
+            signal is promising but inconclusive or the experiment is still
+            running. <span className="text-[var(--danger)]">Stop</span> when
+            treatment underperforms control. Always cross-check observational ATEs
+            on the{" "}
+            <Link
+              href={base ? `${base}/playbooks` : "/playbooks"}
+              className="text-[var(--accent)] hover:underline"
+            >
               playbooks
             </Link>{" "}
-            page before rolling out broadly.
+            page.
           </div>
         </>
       )}

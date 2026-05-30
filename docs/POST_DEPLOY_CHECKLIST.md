@@ -25,6 +25,7 @@ source venv/bin/activate
 python scripts/check_supabase.py   # URL + service role
 npm run build
 npm run lint
+npm run test:install && npm test   # Playwright smoke tests (local)
 ```
 
 Anon key test:
