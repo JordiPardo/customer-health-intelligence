@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/app/page-toolbar";
 import { ExperimentRecommendationBadge } from "@/components/ui/recommendation-badge";
 import { appPath, type AppBase } from "@/lib/app-path";
 import { experimentRecommendation, significanceLabel } from "@/lib/experiment-recommendation";
+import type { ExperimentRow } from "@/lib/types";
 
 export function ExperimentList({
   experiments,
