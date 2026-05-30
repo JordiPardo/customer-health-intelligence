@@ -1,7 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
+  /* Brand — Indigo identity */
+  --brand: #6366f1;
+  --brand-dark: #4f46e5;
+  --brand-light: #eef2ff;
+  --brand-muted: #f5f7ff;
+  --brand-border: #c7d2fe;
+  --brand-glow: rgb(99 102 241 / 0.18);
+
+  /* Surfaces */
+  --background: #f8f9fc;
   --foreground: #09090b;
   --muted: #71717a;
   --muted-foreground: #a1a1aa;
@@ -9,27 +18,35 @@
   --border-subtle: #f4f4f5;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --primary: #18181b;
-  --primary-foreground: #fafafa;
-  --accent: #2563eb;
-  --accent-muted: #eff6ff;
+  --sidebar-bg: #fafbff;
+
+  /* Semantic — primary actions use brand indigo */
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --primary-hover: #4f46e5;
+  --accent: #6366f1;
+  --accent-muted: #eef2ff;
   --danger: #dc2626;
   --danger-muted: #fef2f2;
   --success: #16a34a;
   --success-muted: #f0fdf4;
   --warning: #d97706;
   --warning-muted: #fffbeb;
-  --ai: #7c3aed;
-  --ai-strong: #6d28d9;
-  --ai-muted: #f5f3ff;
-  --ai-border: #ddd6fe;
+
+  /* AI Copilot — aligned with brand violet */
+  --ai: #6366f1;
+  --ai-strong: #4f46e5;
+  --ai-muted: #eef2ff;
+  --ai-border: #c7d2fe;
+
   --ring: #a1a1aa;
   --radius: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  --shadow-raised: 0 6px 20px -6px rgb(0 0 0 / 0.12), 0 2px 6px -2px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-raised: 0 4px 16px -4px rgb(99 102 241 / 0.1), 0 8px 24px -8px rgb(0 0 0 / 0.08);
+  --shadow-brand: 0 4px 14px -3px rgb(99 102 241 / 0.35);
   --shadow-preview: 0 8px 30px rgb(0 0 0 / 0.08), 0 2px 8px rgb(0 0 0 / 0.04);
   --shadow-preview-hover: 0 12px 40px rgb(0 0 0 / 0.1), 0 4px 12px rgb(0 0 0 / 0.05);
   --surface-muted: #f4f4f5;
@@ -66,17 +83,17 @@
   }
 
   h1 {
-    font-size: 1.5rem;
+    font-size: 1.625rem;
     font-weight: 600;
-    letter-spacing: -0.025em;
-    line-height: 1.25;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
     color: var(--foreground);
   }
 
   h2 {
     font-size: 0.9375rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     line-height: 1.35;
     color: var(--foreground);
   }
@@ -87,13 +104,17 @@
     line-height: 1.4;
     color: var(--foreground);
   }
+
+  a:not([class]) {
+    color: var(--brand);
+  }
 }
 
 @layer utilities {
   .text-label {
     font-size: 0.6875rem;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--muted);
   }
@@ -102,6 +123,20 @@
     font-size: 0.8125rem;
     line-height: 1.45;
     color: var(--muted);
+  }
+
+  .text-brand {
+    color: var(--brand);
+  }
+
+  .link-brand {
+    color: var(--brand);
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+
+  .link-brand:hover {
+    color: var(--brand-dark);
   }
 
   .surface-card {
@@ -116,21 +151,23 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
-    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    transition: box-shadow 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
   }
 
   .surface-card-interactive:hover {
-    border-color: #d4d4d8;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.06);
+    border-color: rgb(99 102 241 / 0.15);
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-1px);
   }
 
   .metric-card-hover {
-    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    transition: box-shadow 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
   }
 
   .metric-card-hover:hover {
-    border-color: #d4d4d8;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.06);
+    border-color: rgb(99 102 241 / 0.15);
+    box-shadow: var(--shadow-raised);
+    transform: translateY(-1px);
   }
 
   .table-shell thead th {
@@ -139,7 +176,7 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--muted);
-    background: var(--border-subtle);
+    background: var(--brand-muted);
   }
 
   .table-shell tbody tr {
@@ -147,68 +184,170 @@
   }
 
   .table-shell tbody tr:hover {
-    background: var(--border-subtle);
+    background: var(--brand-light);
   }
 
-  /* ---- Display typography for dominant figures ---- */
+  /* ---- Display typography for hero metrics ---- */
   .text-display {
-    font-size: 2.25rem;
-    font-weight: 600;
-    letter-spacing: -0.035em;
-    line-height: 1.05;
+    font-size: 2.375rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.02;
     font-variant-numeric: tabular-nums;
     color: var(--foreground);
   }
 
   @media (min-width: 1024px) {
     .text-display {
-      font-size: 2.75rem;
+      font-size: 2.875rem;
     }
   }
 
   .text-stat {
-    font-size: 1.375rem;
+    font-size: 1.4375rem;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     font-variant-numeric: tabular-nums;
     line-height: 1.1;
     color: var(--foreground);
   }
 
-  /* ---- Elevated portfolio hero surface ---- */
+  .text-page-title {
+    font-size: 1.625rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--foreground);
+  }
+
+  /* ---- Brand mark ---- */
+  .brand-mark {
+    display: flex;
+    shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+    box-shadow: 0 2px 8px -2px rgb(99 102 241 / 0.45);
+  }
+
+  /* ---- Primary CTA button ---- */
+  .btn-brand {
+    display: inline-flex;
+    height: 2.25rem;
+    align-items: center;
+    border-radius: var(--radius);
+    background: var(--brand);
+    padding-inline: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--primary-foreground);
+    box-shadow: var(--shadow-brand);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+  }
+
+  .btn-brand:hover {
+    background: var(--brand-dark);
+    box-shadow: 0 6px 20px -4px rgb(99 102 241 / 0.45);
+    transform: translateY(-1px);
+  }
+
+  .btn-brand:active {
+    transform: translateY(0);
+  }
+
+  /* ---- Elevated portfolio / account hero ---- */
   .hero-surface {
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1px solid rgb(99 102 241 / 0.14);
     border-radius: var(--radius-xl);
-    background:
-      radial-gradient(130% 130% at 0% 0%, #ffffff 0%, #fbfbfc 48%, #f4f4f6 100%);
-    box-shadow: var(--shadow-raised);
+    background: linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #fafbff 38%,
+      #f5f7ff 72%,
+      var(--brand-light) 100%
+    );
+    box-shadow:
+      0 0 0 1px rgb(99 102 241 / 0.04),
+      0 4px 8px -2px rgb(99 102 241 / 0.06),
+      0 16px 40px -12px rgb(99 102 241 / 0.16);
   }
 
-  /* ---- Compact secondary stat tile ---- */
+  .hero-surface::before {
+    content: "";
+    position: absolute;
+    top: -60px;
+    right: -40px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgb(99 102 241 / 0.1) 0%, transparent 68%);
+    pointer-events: none;
+  }
+
+  .hero-surface::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(99 102 241 / 0.25) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  .hero-surface > *,
+  .ai-panel > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- Secondary stat tiles ---- */
   .stat-tile {
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
   }
 
   .stat-tile:hover {
-    border-color: #d4d4d8;
-    box-shadow: var(--shadow-card);
+    border-color: rgb(99 102 241 / 0.2);
+    box-shadow: 0 4px 12px -4px rgb(99 102 241 / 0.1);
     transform: translateY(-1px);
+  }
+
+  .stat-tile-accent {
+    border-color: rgb(99 102 241 / 0.22);
+    background: linear-gradient(180deg, #ffffff 0%, var(--brand-muted) 100%);
+  }
+
+  .stat-tile-accent:hover {
+    border-color: rgb(99 102 241 / 0.35);
+    box-shadow: 0 6px 16px -4px rgb(99 102 241 / 0.14);
   }
 
   /* ---- Premium AI Copilot panel ---- */
   .ai-panel {
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--ai-border);
+    border: 1px solid rgb(99 102 241 / 0.22);
     border-radius: var(--radius-xl);
-    background:
-      linear-gradient(180deg, var(--ai-muted) 0%, #ffffff 42%);
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.05), 0 8px 24px -12px rgb(124 58 237 / 0.25);
+    background: linear-gradient(
+      168deg,
+      var(--brand-light) 0%,
+      #f8faff 32%,
+      #ffffff 58%
+    );
+    box-shadow:
+      0 0 0 1px rgb(99 102 241 / 0.06),
+      0 4px 20px -6px rgb(99 102 241 / 0.22),
+      0 24px 48px -16px rgb(99 102 241 / 0.14);
   }
 
   .ai-panel::before {
@@ -217,27 +356,60 @@
     inset-inline: 0;
     top: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--ai) 0%, #a78bfa 50%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      var(--brand) 0%,
+      #818cf8 45%,
+      transparent 100%
+    );
+  }
+
+  .ai-panel::after {
+    content: "";
+    position: absolute;
+    bottom: -48px;
+    left: 15%;
+    width: 70%;
+    height: 96px;
+    background: radial-gradient(
+      ellipse at center,
+      rgb(99 102 241 / 0.14) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    filter: blur(16px);
   }
 
   .ai-orb {
-    background: linear-gradient(140deg, var(--ai) 0%, var(--ai-strong) 100%);
-    box-shadow: 0 4px 14px -4px rgb(124 58 237 / 0.5);
+    position: relative;
+    background: linear-gradient(140deg, var(--brand) 0%, var(--brand-dark) 100%);
+    box-shadow:
+      0 0 0 3px rgb(99 102 241 / 0.12),
+      0 4px 16px -4px rgb(99 102 241 / 0.55);
   }
 
-  /* ---- Subtle hover lift for interactive cards ---- */
+  .ai-orb::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgb(99 102 241 / 0.35) 0%, transparent 70%);
+    filter: blur(6px);
+    z-index: -1;
+  }
+
+  /* ---- Interactive card lift ---- */
   .lift-on-hover {
     transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
   }
 
   .lift-on-hover:hover {
-    border-color: #d4d4d8;
+    border-color: rgb(99 102 241 / 0.18);
     box-shadow: var(--shadow-raised);
     transform: translateY(-2px);
   }
 }
 
-/* ---- Subtle entrance motion ---- */
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -260,7 +432,10 @@
     animation: none;
   }
   .lift-on-hover:hover,
-  .stat-tile:hover {
+  .stat-tile:hover,
+  .btn-brand:hover,
+  .surface-card-interactive:hover,
+  .metric-card-hover:hover {
     transform: none;
   }
 }

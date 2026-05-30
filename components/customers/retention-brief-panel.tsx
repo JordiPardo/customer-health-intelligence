@@ -126,7 +126,7 @@ export function RetentionBriefPanel({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-[var(--foreground)]">AI Copilot</h2>
-              <span className="inline-flex items-center rounded-full border border-[var(--ai-border)] bg-white/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--ai-strong)]">
+              <span className="inline-flex items-center rounded-full border border-[rgb(99_102_241_/_0.25)] bg-white/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-dark)]">
                 Beta
               </span>
             </div>
@@ -141,7 +141,6 @@ export function RetentionBriefPanel({
             size="sm"
             onClick={handleGenerate}
             disabled={loading}
-            className="border-0 bg-[var(--ai)] text-white shadow-[0_2px_8px_-2px_rgb(124_58_237_/_0.5)] hover:bg-[var(--ai-strong)] focus-visible:ring-[var(--ai)]"
           >
             {loading ? "Generating…" : brief ? "Regenerate" : "Generate brief"}
           </Button>
@@ -167,7 +166,7 @@ export function RetentionBriefPanel({
 
         {loading && (
           <div className="space-y-2.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-[var(--ai-strong)]">
+            <div className="flex items-center gap-2 text-xs font-medium text-[var(--brand-dark)]">
               <SparkIcon className="h-3.5 w-3.5 animate-pulse" />
               Analyzing account signals…
             </div>

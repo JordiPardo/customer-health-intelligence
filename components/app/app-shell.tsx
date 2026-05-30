@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DemoBanner } from "@/components/app/demo-banner";
 import { SidebarNav } from "@/components/app/sidebar-nav";
 import { SignOutButton } from "@/components/app/sign-out-button";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { Button } from "@/components/ui/button";
 import { appPath, type AppBase } from "@/lib/app-path";
 
@@ -21,20 +22,25 @@ export function AppShell({
 
       <div className="flex min-h-0 flex-1">
         <aside
-          className={`fixed left-0 z-30 hidden w-60 flex-col border-r border-[var(--border)] bg-[var(--surface)] md:flex ${
+          className={`fixed left-0 z-30 hidden w-60 flex-col border-r border-[var(--border)] bg-[var(--sidebar-bg)] md:flex ${
             isDemo ? "top-9 bottom-0" : "inset-y-0"
           }`}
         >
-          <div className="border-b border-[var(--border)] px-4 py-3.5">
+          <div className="border-b border-[var(--border)] px-4 py-4">
             <Link
               href={homeHref}
-              className="block truncate text-sm font-semibold tracking-tight text-[var(--foreground)]"
+              className="flex items-center gap-2.5"
             >
-              Customer health
+              <BrandMark />
+              <div className="min-w-0">
+                <span className="block truncate text-sm font-semibold tracking-tight text-[var(--foreground)]">
+                  Customer health
+                </span>
+                <p className="truncate text-[11px] text-[var(--muted)]">
+                  {isDemo ? "Demo organization" : "Your workspace"}
+                </p>
+              </div>
             </Link>
-            <p className="mt-1 truncate text-[11px] text-[var(--muted)]">
-              {isDemo ? "Demo organization" : "Your workspace"}
-            </p>
           </div>
 
           <div className="flex flex-1 flex-col py-3">
@@ -67,7 +73,8 @@ export function AppShell({
 
         <div className="flex min-w-0 flex-1 flex-col md:pl-60">
           <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)]/90 px-4 backdrop-blur-md md:hidden">
-            <Link href={homeHref} className="text-sm font-semibold tracking-tight">
+            <Link href={homeHref} className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+              <BrandMark className="h-6 w-6" />
               Customer health
             </Link>
             <MobileNav base={base} isDemo={isDemo} />

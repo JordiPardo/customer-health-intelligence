@@ -20,8 +20,8 @@ export const chartLayout = {
     tickfont: { size: 11, color: "#71717a" },
     title: { font: { size: 11, color: "#71717a" } },
   },
-  colorway: ["#2563eb", "#16a34a", "#d97706", "#71717a"],
+  colorway: ["#6366f1", "#16a34a", "#d97706", "#71717a"],
 };
 
-export const chartLinePrimary = { color: "#2563eb", width: 2 };
-export const chartFillPrimary = "rgba(37, 99, 235, 0.06)";
+export const chartLinePrimary = { color: "#6366f1", width: 2 };
+export const chartFillPrimary = "rgba(99, 102, 241, 0.08)";

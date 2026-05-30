@@ -21,7 +21,7 @@ export function CohortTrendChart({
             x: data.map((d) => d.cohort),
             y: data.map((d) => Math.round(d.churnRate * 1000) / 10),
             line: chartLinePrimary,
-            marker: { size: 5, color: "#2563eb" },
+            marker: { size: 5, color: "#6366f1" },
             hovertemplate: "%{x}<br>Churn: %{y:.1f}%<extra></extra>",
           },
         ]}

@@ -18,7 +18,7 @@ export function SegmentBreakdown({
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-[var(--border-subtle)]">
             <div
-              className="h-full rounded-full bg-[var(--accent)]/70"
+              className="h-full rounded-full bg-[var(--brand)]/75"
               style={{ width: `${(seg.count / max) * 100}%` }}
             />
           </div>

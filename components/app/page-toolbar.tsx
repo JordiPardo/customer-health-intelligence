@@ -16,8 +16,8 @@ export function PageToolbar({
   return (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-[var(--border)] pb-5">
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <h1 className="text-page-title">{title}</h1>
           {badge}
         </div>
         {description && (
@@ -35,12 +35,13 @@ export function StatusBadge({
   variant = "neutral",
 }: {
   children: React.ReactNode;
-  variant?: "neutral" | "success" | "warning";
+  variant?: "neutral" | "success" | "warning" | "brand";
 }) {
   const styles = {
     neutral: "border-[var(--border)] bg-[var(--border-subtle)] text-[var(--muted)]",
     success: "border-[var(--success)]/25 bg-[var(--success-muted)] text-[var(--success)]",
     warning: "border-[var(--warning)]/25 bg-[var(--warning-muted)] text-[var(--warning)]",
+    brand: "border-[rgb(99_102_241_/_0.25)] bg-[var(--brand-light)] text-[var(--brand-dark)]",
   };
   return (
     <span

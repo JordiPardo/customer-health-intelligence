@@ -10,9 +10,17 @@ export function Hero() {
       <PublicHeader />
 
       <main>
-        <section className="relative overflow-hidden border-b border-[var(--border)]">
+        <section className="relative overflow-hidden border-b border-[var(--border)] bg-gradient-to-b from-[var(--brand-muted)] via-[var(--background)] to-[var(--background)]">
           <div
-            className="pointer-events-none absolute inset-0 opacity-40"
+            className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full opacity-60"
+            aria-hidden
+            style={{
+              background:
+                "radial-gradient(circle, rgb(99 102 241 / 0.12) 0%, transparent 70%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 opacity-30"
             aria-hidden
             style={{
               backgroundImage:
@@ -22,7 +30,7 @@ export function Hero() {
           />
           <div className="relative mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-16">
             <div className="animate-fade-up">
-              <p className="text-label mb-3">SaaS operations intelligence</p>
+              <p className="text-label text-brand mb-3">SaaS operations intelligence</p>
               <h1 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem] lg:leading-[1.15]">
                 Predict which customers will churn—and when
               </h1>

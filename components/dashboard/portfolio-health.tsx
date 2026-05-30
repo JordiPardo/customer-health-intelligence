@@ -41,7 +41,7 @@ export function PortfolioHealth({
         {/* Dominant revenue + risk block */}
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-label">Portfolio health</span>
+            <span className="text-label text-brand">Portfolio health</span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--success)]/25 bg-[var(--success-muted)] px-2 py-0.5 text-[11px] font-medium text-[var(--success)]">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
               {securedPct}% revenue secured
@@ -75,7 +75,7 @@ export function PortfolioHealth({
           <div className="mt-6">
             <Link
               href={appPath(base, "/customers")}
-              className="inline-flex h-9 items-center rounded-[var(--radius)] bg-[var(--primary)] px-4 text-xs font-medium text-[var(--primary-foreground)] shadow-[var(--shadow-sm)] transition-colors hover:bg-[#27272a]"
+              className="btn-brand"
             >
               Review at-risk accounts
             </Link>

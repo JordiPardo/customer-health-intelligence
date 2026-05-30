@@ -28,7 +28,7 @@ export function MetricCard({
       : accent === "success"
         ? "before:bg-[var(--success)]"
         : accent === "accent"
-          ? "before:bg-[var(--accent)]"
+          ? "before:bg-[var(--brand)]"
           : "";
 
   return (

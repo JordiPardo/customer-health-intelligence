@@ -122,10 +122,7 @@ export function LandingSections() {
               >
                 Open demo
               </a>
-              <a
-                href="/signup"
-                className="inline-flex h-9 items-center justify-center rounded-[var(--radius)] bg-[var(--primary)] px-4 text-sm font-medium text-[var(--primary-foreground)] shadow-[var(--shadow-sm)] transition-colors hover:bg-[#27272a]"
-              >
+              <a href="/signup" className="btn-brand text-sm">
                 Start free trial
               </a>
             </div>

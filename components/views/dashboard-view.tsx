@@ -120,7 +120,7 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
           <p className="mt-1.5 text-stat">{avgRisk}%</p>
           <p className="mt-1 text-caption">Portfolio-wide mean</p>
         </div>
-        <div className="stat-tile px-4 py-3.5">
+        <div className="stat-tile stat-tile-accent px-4 py-3.5">
           <p className="text-label">Needs attention</p>
           <p className="mt-1.5 text-stat text-[var(--warning)]">
             {needsAttention}
