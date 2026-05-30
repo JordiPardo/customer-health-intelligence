@@ -45,7 +45,7 @@ export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
         }
       />
 
-      <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-5 py-4 text-caption">
+      <div className="animate-fade-up rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-5 py-4 text-caption">
         <strong className="font-medium text-[var(--foreground)]">
           How to read ATE:
         </strong>{" "}
@@ -64,7 +64,7 @@ export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
         />
       ) : (
         <>
-          <Card>
+          <Card interactive className="animate-fade-up">
             <CardHeader>
               <CardTitle subtitle="All segment × treatment combinations with recommendation labels">
                 All estimates
@@ -75,9 +75,12 @@ export async function PlaybooksView({ base = "" }: { base?: AppBase }) {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div
+            className="grid animate-fade-up gap-6 lg:grid-cols-3"
+            style={{ animationDelay: "80ms" }}
+          >
             {bySegment.map(({ segment, rows }) => (
-              <Card key={segment}>
+              <Card key={segment} interactive>
                 <CardHeader>
                   <CardTitle subtitle="Beneficial treatments only, ranked by impact">
                     {segment} — top actions

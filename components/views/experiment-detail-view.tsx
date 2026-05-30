@@ -12,7 +12,6 @@ import {
   significanceLabel,
 } from "@/lib/experiment-recommendation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MetricCard } from "@/components/ui/metric-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { appPath, type AppBase } from "@/lib/app-path";
 import { getExperimentById } from "@/lib/queries/experiments";
@@ -77,41 +76,100 @@ export async function ExperimentDetailView({
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          label="Treatment arm"
-          value={experiment.treatment_count}
-          hint="accounts"
-        />
-        <MetricCard
-          label="Control arm"
-          value={experiment.control_count}
-          hint="accounts"
-        />
-        {experiment.result ? (
-          <>
-            <MetricCard
-              label="Relative uplift"
-              value={`+${experiment.result.uplift_pct.toFixed(1)}%`}
-              trend="positive"
-              hint="churn reduction"
-            />
-            <MetricCard
-              label="p-value"
-              value={experiment.result.p_value.toFixed(3)}
-              hint={significanceLabel(experiment.result.p_value)}
-            />
-          </>
-        ) : (
-          <>
-            <MetricCard label="Relative uplift" value="—" hint="Pending" />
-            <MetricCard label="p-value" value="—" hint="Pending" />
-          </>
-        )}
-      </div>
+      <section className="hero-surface animate-fade-up px-6 py-6 sm:px-8 sm:py-7">
+        <div className="grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:gap-10">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-label">Experiment result</span>
+              <ExperimentRecommendationBadge recommendation={rec} />
+            </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+            <div className="mt-5 flex flex-wrap items-end gap-x-10 gap-y-5">
+              {experiment.result ? (
+                <>
+                  <div>
+                    <p className="text-label mb-1.5">Relative uplift</p>
+                    <p
+                      className={`text-display ${
+                        experiment.result.uplift_pct >= 0
+                          ? "text-[var(--success)]"
+                          : "text-[var(--danger)]"
+                      }`}
+                    >
+                      {experiment.result.uplift_pct >= 0 ? "+" : ""}
+                      {experiment.result.uplift_pct.toFixed(1)}%
+                    </p>
+                    <p className="mt-1.5 text-caption">
+                      Churn reduction vs. control
+                    </p>
+                  </div>
+                  <div className="pb-1">
+                    <p className="text-label mb-1.5">Significance</p>
+                    <p
+                      className={`text-stat ${
+                        experiment.result.p_value < 0.05
+                          ? "text-[var(--success)]"
+                          : "text-[var(--muted)]"
+                      }`}
+                    >
+                      {significanceLabel(experiment.result.p_value)}
+                    </p>
+                    <p className="mt-1.5 text-caption">
+                      p = {experiment.result.p_value.toFixed(3)}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <p className="text-label mb-1.5">Enrollment</p>
+                  <p className="text-display">
+                    {experiment.treatment_count + experiment.control_count}
+                  </p>
+                  <p className="mt-1.5 text-caption">
+                    Collecting outcomes — results pending
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="lg:border-l lg:border-[var(--border)] lg:pl-10">
+            <p className="text-label mb-3">Test arms</p>
+            <dl className="space-y-2.5 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-[var(--muted)]">Treatment</dt>
+                <dd className="font-medium tabular-nums">
+                  {experiment.treatment_count.toLocaleString()}
+                  {experiment.result && (
+                    <span className="ml-2 text-[var(--muted)]">
+                      {(experiment.result.treatment_churn_rate * 100).toFixed(1)}%
+                      churn
+                    </span>
+                  )}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-[var(--muted)]">Control</dt>
+                <dd className="font-medium tabular-nums">
+                  {experiment.control_count.toLocaleString()}
+                  {experiment.result && (
+                    <span className="ml-2 text-[var(--muted)]">
+                      {(experiment.result.control_churn_rate * 100).toFixed(1)}%
+                      churn
+                    </span>
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <div
+        className="grid animate-fade-up gap-4 lg:grid-cols-2"
+        style={{ animationDelay: "60ms" }}
+      >
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle="Observed churn rate by arm">
               Results
@@ -129,7 +187,7 @@ export async function ExperimentDetailView({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card interactive>
           <CardHeader>
             <CardTitle subtitle="Playbook under test">
               Intervention
@@ -160,7 +218,7 @@ export async function ExperimentDetailView({
       </div>
 
       {experiment.result && (
-        <Card>
+        <Card interactive className="animate-fade-up">
           <CardHeader>
             <CardTitle subtitle="Treatment vs. control interpretation">
               Analysis notes

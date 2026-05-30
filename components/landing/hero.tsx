@@ -21,7 +21,7 @@ export function Hero() {
             }}
           />
           <div className="relative mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-16">
-            <div>
+            <div className="animate-fade-up">
               <p className="text-label mb-3">SaaS operations intelligence</p>
               <h1 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem] lg:leading-[1.15]">
                 Predict which customers will churn—and when
@@ -50,7 +50,7 @@ export function Hero() {
                 <span>✓ Causal playbooks</span>
               </div>
             </div>
-            <div className="lg:pl-2">
+            <div className="animate-fade-up lg:pl-2" style={{ animationDelay: "120ms" }}>
               <DashboardPreview />
             </div>
           </div>

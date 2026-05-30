@@ -43,9 +43,14 @@ export async function ExperimentsView({ base = "" }: { base?: AppBase }) {
         />
       ) : (
         <>
-          <ExperimentCards experiments={experiments} base={base} />
+          <div className="animate-fade-up">
+            <ExperimentCards experiments={experiments} base={base} />
+          </div>
 
-          <Card>
+          <Card
+            interactive
+            className="animate-fade-up"
+          >
             <CardHeader>
               <CardTitle subtitle="Compact view for comparing all experiments">
                 Summary table
@@ -56,7 +61,7 @@ export async function ExperimentsView({ base = "" }: { base?: AppBase }) {
             </CardContent>
           </Card>
 
-          <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-5 py-4 text-caption">
+          <div className="animate-fade-up rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-5 py-4 text-caption">
             <strong className="font-medium text-[var(--foreground)]">
               Decision framework:
             </strong>{" "}

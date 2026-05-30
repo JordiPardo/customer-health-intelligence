@@ -65,13 +65,16 @@ export function SidebarNav({ base = "" }: { base?: AppBase }) {
           <Link
             key={item.suffix}
             href={href}
-            className={`flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium transition-colors ${
+            aria-current={active ? "page" : undefined}
+            className={`relative flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium transition-colors ${
               active
-                ? "bg-[var(--border-subtle)] text-[var(--foreground)]"
+                ? "bg-[var(--border-subtle)] text-[var(--foreground)] before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-[var(--accent)]"
                 : "text-[var(--muted)] hover:bg-[var(--border-subtle)] hover:text-[var(--foreground)]"
             }`}
           >
-            {navIcon(item.suffix)}
+            <span className={active ? "text-[var(--accent)]" : ""}>
+              {navIcon(item.suffix)}
+            </span>
             {item.label}
           </Link>
         );
