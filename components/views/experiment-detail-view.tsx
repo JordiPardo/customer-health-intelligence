@@ -139,7 +139,7 @@ export async function ExperimentDetailView({
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-[var(--muted)]">Treatment</dt>
                 <dd className="font-medium tabular-nums">
-                  {experiment.treatment_count.toLocaleString()}
+                  {experiment.treatment_count.toLocaleString("en-US")}
                   {experiment.result && (
                     <span className="ml-2 text-[var(--muted)]">
                       {(experiment.result.treatment_churn_rate * 100).toFixed(1)}%
@@ -151,7 +151,7 @@ export async function ExperimentDetailView({
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-[var(--muted)]">Control</dt>
                 <dd className="font-medium tabular-nums">
-                  {experiment.control_count.toLocaleString()}
+                  {experiment.control_count.toLocaleString("en-US")}
                   {experiment.result && (
                     <span className="ml-2 text-[var(--muted)]">
                       {(experiment.result.control_churn_rate * 100).toFixed(1)}%

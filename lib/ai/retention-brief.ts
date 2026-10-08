@@ -74,7 +74,7 @@ export async function buildRetentionBriefContext(customerId: string) {
       mrr: customer.mrr,
       cohort_month: customer.cohort_month,
       signup_date: customer.signup_date,
-      risk_band: riskLabel(getRiskLevel(customer.churn_risk_30d)),
+      risk_band: riskLabel(getRiskLevel(customer.churn_risk_90d)),
       churn_risk_30d_pct: Math.round(customer.churn_risk_30d * 100),
       churn_risk_90d_pct: Math.round(customer.churn_risk_90d * 100),
       median_days_to_churn: customer.median_days_to_churn,

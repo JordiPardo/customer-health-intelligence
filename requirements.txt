@@ -8,3 +8,6 @@ scikit-learn>=1.5
 stripe>=11.0
 # econml has heavy deps; install when starting causal inference (Phase 4)
 # econml>=0.15
+
+# Development
+pytest>=8

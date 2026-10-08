@@ -10,7 +10,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { appPath, type AppBase } from "@/lib/app-path";
 import { getDashboardStats } from "@/lib/queries/dashboard";
 import { getCustomers } from "@/lib/queries/customers";
-import { getRiskLevel } from "@/lib/risk";
+import { expectedMrrAtRisk, getRiskLevel } from "@/lib/risk";
+import modelReport from "@/data/synthetic/model_report.json";
 
 function severityClass(severity: string) {
   if (severity === "high") return "text-[var(--danger)]";
@@ -25,7 +26,7 @@ function buildSegmentBreakdown(
   for (const c of customers) {
     const entry = map.get(c.segment) ?? { count: 0, highRisk: 0 };
     entry.count += 1;
-    if (getRiskLevel(c.churn_risk_30d) === "high") entry.highRisk += 1;
+    if (getRiskLevel(c.churn_risk_90d) === "high") entry.highRisk += 1;
     map.set(c.segment, entry);
   }
   return ["Enterprise", "Mid-Market", "SMB"]
@@ -44,8 +45,8 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
   ]);
 
   const atRisk = customers
-    .filter((c) => c.churn_risk_30d > 0.5)
-    .sort((a, b) => b.churn_risk_30d - a.churn_risk_30d)
+    .filter((c) => getRiskLevel(c.churn_risk_90d) === "high")
+    .sort((a, b) => b.churn_risk_90d * b.mrr - a.churn_risk_90d * a.mrr)
     .slice(0, 6);
 
   const segmentBreakdown = buildSegmentBreakdown(customers);
@@ -53,19 +54,17 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
 
   const totalMrr = customers.reduce((sum, c) => sum + c.mrr, 0);
   const highRiskCustomers = customers.filter(
-    (c) => getRiskLevel(c.churn_risk_30d) === "high",
+    (c) => getRiskLevel(c.churn_risk_90d) === "high",
   );
-  const atRiskMrr = highRiskCustomers.reduce((sum, c) => sum + c.mrr, 0);
+  const atRiskMrr = expectedMrrAtRisk(customers);
   const avgRisk =
     customers.length > 0
-      ? Math.round(
-          (customers.reduce((sum, c) => sum + c.churn_risk_30d, 0) /
-            customers.length) *
-            100,
-        )
+      ? (customers.reduce((sum, c) => sum + c.churn_risk_90d, 0) /
+          customers.length) *
+        100
       : 0;
   const needsAttention = customers.filter(
-    (c) => getRiskLevel(c.churn_risk_30d) !== "low",
+    (c) => getRiskLevel(c.churn_risk_90d) !== "low",
   ).length;
   const healthyAccounts = customers.length - needsAttention;
 
@@ -84,10 +83,14 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
         }
         meta={
           <>
-            <StatusBadge>{stats.totalCustomers} accounts</StatusBadge>
-            <StatusBadge>30-day window</StatusBadge>
+            <StatusBadge>
+              {stats.totalCustomers.toLocaleString("en-US")} active accounts
+            </StatusBadge>
+            <StatusBadge>90-day window</StatusBadge>
             <span className="text-xs text-[var(--muted)]">
-              Model: Cox PH · Updated today
+              Model: Cox PH · out-of-time C-index{" "}
+              {modelReport.backtest.c_index_test.toFixed(2)} · data as of{" "}
+              {modelReport.snapshot_date}
             </span>
           </>
         }
@@ -117,8 +120,8 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
         style={{ animationDelay: "60ms" }}
       >
         <div className="stat-tile px-4 py-3.5">
-          <p className="text-label">Avg 30-day risk</p>
-          <p className="mt-1.5 text-stat">{avgRisk}%</p>
+          <p className="text-label">Avg 90-day risk</p>
+          <p className="mt-1.5 text-stat">{avgRisk.toFixed(1)}%</p>
           <p className="mt-1 text-caption">Portfolio-wide mean</p>
         </div>
         <div className="stat-tile stat-tile-accent px-4 py-3.5">
@@ -143,7 +146,7 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
       >
         <Card className="lg:col-span-2" interactive>
           <CardHeader>
-            <CardTitle subtitle="Monthly churn rate by customer cohort">
+            <CardTitle subtitle="Share of each signup cohort that churned within its first 90 days">
               Cohort churn trend
             </CardTitle>
           </CardHeader>
@@ -185,7 +188,7 @@ export async function DashboardView({ base = "" }: { base?: AppBase }) {
       >
         <Card interactive>
           <CardHeader>
-            <CardTitle subtitle="Top accounts by 30-day churn probability">
+            <CardTitle subtitle="High-risk accounts ranked by expected MRR loss">
               At-risk accounts
             </CardTitle>
             <Link

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { RiskBadge } from "@/components/ui/risk-badge";
 import { appPath, type AppBase } from "@/lib/app-path";
+import { formatUsd } from "@/lib/risk";
 import type { CustomerWithRisk } from "@/lib/types";
 
 export function AtRiskPanel({
@@ -29,13 +30,13 @@ export function AtRiskPanel({
                 {c.name}
               </p>
               <p className="text-xs text-[var(--muted)]">
-                {c.segment} · ${c.mrr.toLocaleString()} MRR
+                {c.segment} · {formatUsd(c.mrr)} MRR
               </p>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1">
-              <RiskBadge score={c.churn_risk_30d} />
+              <RiskBadge score={c.churn_risk_90d} />
               <span className="text-[11px] tabular-nums text-[var(--muted)]">
-                {c.median_days_to_churn ?? "—"}d
+                {(c.churn_risk_90d * 100).toFixed(0)}% · 90d
               </span>
             </div>
           </Link>

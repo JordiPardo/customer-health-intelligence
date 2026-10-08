@@ -1,8 +1,11 @@
+import metadata from "@/data/synthetic/metadata.json";
+import modelReport from "@/data/synthetic/model_report.json";
+
 const CAPABILITIES = [
   {
     title: "Churn risk scoring",
     description:
-      "30- and 90-day survival probabilities with confidence intervals per account.",
+      "30- and 90-day churn probabilities and churn-timing estimates per account.",
     icon: "risk",
   },
   {
@@ -33,10 +36,13 @@ const WORKFLOW = [
 ];
 
 const METRICS = [
-  { value: "500+", label: "Accounts per workspace" },
-  { value: "30d", label: "Forward-looking risk window" },
+  {
+    value: metadata.num_customers.toLocaleString("en-US"),
+    label: "Synthetic accounts with known ground truth",
+  },
+  { value: "90d", label: "Forward-looking risk window" },
+  { value: modelReport.backtest.c_index_test.toFixed(2), label: "Out-of-time C-index" },
   { value: "12", label: "Causal playbook estimates" },
-  { value: "<2s", label: "Dashboard load time" },
 ];
 
 export function LandingSections() {
@@ -111,7 +117,8 @@ export function LandingSections() {
                 Explore with synthetic data
               </h2>
               <p className="max-w-md text-caption">
-                500 customers, survival predictions, and causal playbooks—no
+                {metadata.num_customers.toLocaleString("en-US")} customers, survival
+                predictions, and causal playbooks—no
                 signup required for the read-only demo.
               </p>
             </div>

@@ -1,4 +1,4 @@
-import { DEMO_ORG_ID, getDemoDb } from "@/lib/queries/db";
+import { DEMO_ORG_ID, fetchAllRows, getDemoDb } from "@/lib/queries/db";
 import type { CustomerWithRisk, UsagePoint } from "@/lib/types";
 
 function mapCustomer(
@@ -41,18 +41,25 @@ function mapCustomer(
   };
 }
 
-const customerSelect = `
-  id, name, mrr, segment, plan_tier, cohort_month, industry, signup_date,
-  survival_predictions (churn_risk_30d, churn_risk_90d, median_days_to_churn, confidence_interval)
-`;
+const customerColumns =
+  "id, name, mrr, segment, plan_tier, cohort_month, industry, signup_date";
+const predictionColumns =
+  "churn_risk_30d, churn_risk_90d, median_days_to_churn, confidence_interval";
+const customerSelect = `${customerColumns}, survival_predictions (${predictionColumns})`;
+const activeCustomerSelect = `${customerColumns}, survival_predictions!inner (${predictionColumns})`;
 
+/** Active (scored) accounts — churned customers have no prediction row. */
 export async function getCustomers(): Promise<CustomerWithRisk[]> {
   const supabase = getDemoDb();
-  const { data, error } = await supabase
-    .from("customers")
-    .select(customerSelect)
-    .eq("organization_id", DEMO_ORG_ID)
-    .order("name");
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase
+      .from("customers")
+      .select(activeCustomerSelect)
+      .eq("organization_id", DEMO_ORG_ID)
+      .order("name")
+      .order("id")
+      .range(from, to),
+  );
 
   if (error) {
     console.error("getCustomers", error);

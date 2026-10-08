@@ -1,7 +1,7 @@
 name: Keep demo alive
 
 # Supabase free tier pauses projects after ~1 week without activity.
-# Hitting the demo triggers ISR revalidation, which queries Supabase.
+# Demo pages render on request, so hitting them queries Supabase.
 on:
   schedule:
     - cron: "0 7 */3 * *"

@@ -153,8 +153,9 @@ def get_database_url() -> str:
 def load_customers_rest(client) -> pd.DataFrame:
     resp = (
         client.table("customers")
-        .select("id, segment")
+        .select("id, segment, churn_labels!inner(churned)")
         .eq("organization_id", DEMO_ORG_ID)
+        .eq("churn_labels.churned", False)
         .execute()
     )
     rows = resp.data or []
@@ -173,7 +174,8 @@ def load_customers_postgres() -> pd.DataFrame:
                 """
                 SELECT c.id::text AS customer_id, c.segment
                 FROM customers c
-                WHERE c.organization_id = %s
+                JOIN churn_labels l ON l.customer_id = c.id
+                WHERE c.organization_id = %s AND NOT l.churned
                 """,
                 conn,
                 params=(DEMO_ORG_ID,),

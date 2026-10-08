@@ -1,5 +1,5 @@
 import type { RiskDriver, CustomerTimelineEvent } from "@/lib/customer-health";
-import { riskStyles, riskLabel, getRiskLevel } from "@/lib/risk";
+import { formatUsd, riskStyles, riskLabel, getRiskLevel } from "@/lib/risk";
 import type { CustomerWithRisk } from "@/lib/types";
 
 const RISK_ACTION: Record<string, string> = {
@@ -13,7 +13,7 @@ export function AccountHealthHero({
 }: {
   customer: CustomerWithRisk;
 }) {
-  const level = getRiskLevel(customer.churn_risk_30d);
+  const level = getRiskLevel(customer.churn_risk_90d);
   const styles = riskStyles[level];
 
   const facts = [
@@ -55,16 +55,16 @@ export function AccountHealthHero({
 
           <div className="mt-5 flex flex-wrap items-end gap-x-10 gap-y-5">
             <div>
-              <p className="text-label mb-1.5">30-day churn risk</p>
+              <p className="text-label mb-1.5">90-day churn risk</p>
               <p className={`text-display ${styles.text}`}>
-                {(customer.churn_risk_30d * 100).toFixed(0)}%
+                {(customer.churn_risk_90d * 100).toFixed(0)}%
               </p>
               <p className="mt-1.5 text-caption">{RISK_ACTION[level]}</p>
             </div>
 
             <div className="pb-1">
               <p className="text-label mb-1.5">Revenue exposure · MRR</p>
-              <p className="text-stat">${customer.mrr.toLocaleString()}</p>
+              <p className="text-stat">{formatUsd(customer.mrr)}</p>
               <p className="mt-1.5 text-caption">
                 {level === "low"
                   ? "Protected — low churn probability"
@@ -101,7 +101,7 @@ export function AccountHealthSummary({
 }: {
   customer: CustomerWithRisk;
 }) {
-  const level = getRiskLevel(customer.churn_risk_30d);
+  const level = getRiskLevel(customer.churn_risk_90d);
   const styles = riskStyles[level];
 
   return (

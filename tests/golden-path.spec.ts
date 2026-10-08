@@ -22,7 +22,7 @@ test.describe("golden path", () => {
       page.getByText("How healthy is my portfolio?"),
     ).toBeVisible();
     await expect(page.getByText("Portfolio health")).toBeVisible();
-    await expect(page.getByText(/Revenue at risk/i).first()).toBeVisible();
+    await expect(page.getByText(/Expected MRR at risk/i).first()).toBeVisible();
 
     // 2. Triage — which accounts need attention
     await page.getByRole("link", { name: "Customers", exact: true }).click();
@@ -30,7 +30,7 @@ test.describe("golden path", () => {
     await expect(
       page.getByText("Which accounts need attention right now?"),
     ).toBeVisible();
-    await expect(page.getByText("Revenue at risk")).toBeVisible();
+    await expect(page.getByText(/Expected MRR at risk/i).first()).toBeVisible();
 
     const firstCustomer = page.locator("table tbody tr").first().getByRole("link");
     await expect(firstCustomer).toBeVisible();

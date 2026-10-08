@@ -52,5 +52,6 @@ def load_training_data(*, prefer_postgres: bool = True) -> dict[str, pd.DataFram
         "payment_events",
         "support_sentiment",
         "churn_labels",
+        "playbook_touches",
     ]
     return {name: load_table(name, prefer_postgres=prefer_postgres) for name in tables}

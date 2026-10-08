@@ -4,7 +4,7 @@ import { appPath, type AppBase } from "@/lib/app-path";
 function formatCurrency(value: number): string {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}k`;
-  return `$${value.toLocaleString()}`;
+  return `$${Math.round(value).toLocaleString("en-US")}`;
 }
 
 export function PortfolioHealth({
@@ -26,8 +26,8 @@ export function PortfolioHealth({
   mediumPct: number;
   lowPct: number;
 }) {
-  const atRiskShare = totalMrr > 0 ? Math.round((atRiskMrr / totalMrr) * 100) : 0;
-  const securedPct = 100 - atRiskShare;
+  const atRiskShare = totalMrr > 0 ? (atRiskMrr / totalMrr) * 100 : 0;
+  const securedPct = Math.round(100 - atRiskShare);
 
   const bands = [
     { label: "Low", pct: lowPct, color: "var(--success)" },
@@ -50,12 +50,12 @@ export function PortfolioHealth({
 
           <div className="mt-5 flex flex-wrap items-end gap-x-10 gap-y-5">
             <div>
-              <p className="text-label mb-1.5">Revenue at risk · 30d</p>
+              <p className="text-label mb-1.5">Expected MRR at risk · 90d</p>
               <p className="text-display text-[var(--danger)]">
                 {formatCurrency(atRiskMrr)}
               </p>
               <p className="mt-1.5 text-caption">
-                {atRiskShare}% of MRR across{" "}
+                {atRiskShare.toFixed(1)}% of MRR, probability-weighted ·{" "}
                 <span className="font-medium text-[var(--foreground)]">
                   {atRiskCount}
                 </span>{" "}
@@ -67,7 +67,7 @@ export function PortfolioHealth({
               <p className="text-label mb-1.5">Monthly recurring revenue</p>
               <p className="text-stat">{formatCurrency(totalMrr)}</p>
               <p className="mt-1.5 text-caption">
-                across {totalCustomers.toLocaleString()} accounts
+                across {totalCustomers.toLocaleString("en-US")} active accounts
               </p>
             </div>
           </div>

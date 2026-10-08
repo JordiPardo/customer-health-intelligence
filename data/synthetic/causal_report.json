@@ -1,0 +1,149 @@
+{
+  "design": {
+    "landmark_days": 90,
+    "outcome_window_days": 180,
+    "population": 1569,
+    "outcome_rate": 0.153,
+    "estimator": "AIPW (doubly robust), 95% bootstrap CI"
+  },
+  "estimates": [
+    {
+      "treatment": "proactive_success_call",
+      "segment": "SMB",
+      "ate": 7.77,
+      "confidence_lower": -0.64,
+      "confidence_upper": 15.34,
+      "sample_size": 697,
+      "treated_count": 89,
+      "naive_ate": 2.77,
+      "true_ate": 5.73
+    },
+    {
+      "treatment": "proactive_success_call",
+      "segment": "Mid-Market",
+      "ate": 11.92,
+      "confidence_lower": 8.52,
+      "confidence_upper": 15.75,
+      "sample_size": 545,
+      "treated_count": 59,
+      "naive_ate": 9.78,
+      "true_ate": 6.06
+    },
+    {
+      "treatment": "proactive_success_call",
+      "segment": "Enterprise",
+      "ate": 3.44,
+      "confidence_lower": -2.51,
+      "confidence_upper": 8.61,
+      "sample_size": 327,
+      "treated_count": 35,
+      "naive_ate": -1.38,
+      "true_ate": 4.59
+    },
+    {
+      "treatment": "payment_recovery_workflow",
+      "segment": "SMB",
+      "ate": 8.32,
+      "confidence_lower": -2.95,
+      "confidence_upper": 19.22,
+      "sample_size": 697,
+      "treated_count": 97,
+      "naive_ate": 8.23,
+      "true_ate": 8.45
+    },
+    {
+      "treatment": "payment_recovery_workflow",
+      "segment": "Mid-Market",
+      "ate": -7.62,
+      "confidence_lower": -19.2,
+      "confidence_upper": 4.14,
+      "sample_size": 545,
+      "treated_count": 80,
+      "naive_ate": -9.25,
+      "true_ate": 3.12
+    },
+    {
+      "treatment": "payment_recovery_workflow",
+      "segment": "Enterprise",
+      "ate": 0.6,
+      "confidence_lower": -12.43,
+      "confidence_upper": 7.94,
+      "sample_size": 327,
+      "treated_count": 42,
+      "naive_ate": 0.23,
+      "true_ate": 5.2
+    },
+    {
+      "treatment": "onboarding_relaunch",
+      "segment": "SMB",
+      "ate": 11.4,
+      "confidence_lower": 5.21,
+      "confidence_upper": 17.54,
+      "sample_size": 697,
+      "treated_count": 241,
+      "naive_ate": 8.79,
+      "true_ate": 10.74
+    },
+    {
+      "treatment": "onboarding_relaunch",
+      "segment": "Mid-Market",
+      "ate": 3.15,
+      "confidence_lower": -5.93,
+      "confidence_upper": 10.54,
+      "sample_size": 545,
+      "treated_count": 70,
+      "naive_ate": -0.86,
+      "true_ate": 2.94
+    },
+    {
+      "treatment": "onboarding_relaunch",
+      "segment": "Enterprise",
+      "ate": 0.68,
+      "confidence_lower": -13.45,
+      "confidence_upper": 9.68,
+      "sample_size": 327,
+      "treated_count": 13,
+      "naive_ate": -0.37,
+      "true_ate": 1.22
+    },
+    {
+      "treatment": "expansion_discount",
+      "segment": "SMB",
+      "ate": 2.63,
+      "confidence_lower": -9.28,
+      "confidence_upper": 13.47,
+      "sample_size": 697,
+      "treated_count": 50,
+      "naive_ate": -11.29,
+      "true_ate": -2.29
+    },
+    {
+      "treatment": "expansion_discount",
+      "segment": "Mid-Market",
+      "ate": -6.85,
+      "confidence_lower": -20.09,
+      "confidence_upper": 6.76,
+      "sample_size": 545,
+      "treated_count": 29,
+      "naive_ate": -16.35,
+      "true_ate": 1.28
+    },
+    {
+      "treatment": "expansion_discount",
+      "segment": "Enterprise",
+      "ate": -3.14,
+      "confidence_lower": -22.64,
+      "confidence_upper": 8.99,
+      "sample_size": 327,
+      "treated_count": 12,
+      "naive_ate": -1.03,
+      "true_ate": 0.0
+    }
+  ],
+  "vs_truth": {
+    "cells": 12,
+    "mean_abs_error_naive": 5.43,
+    "mean_abs_error_aipw": 3.51,
+    "ci_coverage": 0.917
+  }
+}

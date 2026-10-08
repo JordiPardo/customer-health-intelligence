@@ -52,7 +52,8 @@ __pycache__/
 
 # synthetic data (regenerate locally)
 data/synthetic/*.csv
-data/synthetic/metadata.json
+# metadata.json, model_report.json and causal_report.json are committed:
+# the app imports them at build time.
 data/synthetic/training_features.csv
 data/synthetic/survival_predictions.csv
 data/synthetic/causal_estimates.csv

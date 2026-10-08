@@ -6,6 +6,7 @@ Usage:
   python scripts/run_ml_pipeline.py
   python scripts/run_ml_pipeline.py --csv-only   # skip DB upload
   python scripts/run_ml_pipeline.py --replace    # delete existing predictions first
+  python scripts/run_ml_pipeline.py --from-db    # train from Supabase tables instead of CSV
 """
 
 from __future__ import annotations
@@ -103,24 +104,44 @@ def main() -> None:
         action="store_true",
         help="Replace existing predictions in Supabase",
     )
+    parser.add_argument(
+        "--from-db",
+        action="store_true",
+        help="Read training data from Supabase instead of data/synthetic/*.csv",
+    )
     args = parser.parse_args()
 
-    print("Loading data...")
-    features, predictions, metrics = run_training(prefer_postgres=True)
+    print("Training (cutoff design, out-of-time backtest)...")
+    features, predictions, metrics = run_training(prefer_postgres=args.from_db)
 
-    print(f"  customers in training set: {len(features)}")
-    print(f"  concordance index (C-index): {metrics['concordance_index']}")
-    print(f"  median survival (KM, days): {metrics['median_survival_all']:.0f}")
-
-    save_outputs(features, predictions)
-    print("Saved data/synthetic/training_features.csv")
-    print("Saved data/synthetic/survival_predictions.csv")
-
-    risk = predictions["churn_risk_30d"]
+    backtest = metrics["backtest"]
     print(
-        f"  30d churn risk — high (>0.6): {(risk > 0.6).sum()}, "
-        f"medium (0.3–0.6): {((risk >= 0.3) & (risk <= 0.6)).sum()}, "
-        f"low (<0.3): {(risk < 0.3).sum()}"
+        f"  backtest: train cutoff {backtest['train_cutoff']} "
+        f"({backtest['n_train']} accounts, {backtest['events_train']} churns) → "
+        f"test cutoff {backtest['test_cutoff']} ({backtest['n_test']} accounts, "
+        f"{backtest['events_test']} churns)"
+    )
+    print(f"  C-index: train {backtest['c_index_train']} · out-of-time test {backtest['c_index_test']}")
+    for horizon, scores in backtest["brier"].items():
+        print(
+            f"  Brier@{horizon}d: model {scores['model']} vs Kaplan-Meier {scores['km_baseline']} "
+            f"(skill {scores['skill']})"
+        )
+    print(f"  churners captured in top 20% risk: {backtest['top_20pct_churn_capture']:.0%}")
+    print("  coefficients (estimate [95% CI] · true):")
+    for row in metrics["coefficients"]:
+        print(
+            f"    {row['feature']:<24} {row['estimate']:>7} "
+            f"[{row['ci_lower']}, {row['ci_upper']}] · {row['true']}"
+        )
+
+    save_outputs(features, predictions, metrics)
+    print("Saved data/synthetic/training_features.csv, survival_predictions.csv, model_report.json")
+
+    bands = metrics["risk_bands"]
+    print(
+        f"  {len(predictions)} active accounts scored · 90d risk bands — "
+        f"high {bands['high']:.0%}, medium {bands['medium']:.0%}, low {bands['low']:.0%}"
     )
 
     if not args.csv_only:

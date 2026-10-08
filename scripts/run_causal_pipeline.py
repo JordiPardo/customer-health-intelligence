@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import uuid
@@ -26,9 +27,14 @@ from dotenv import load_dotenv
 load_dotenv(ROOT / ".env.local")
 load_dotenv(ROOT / ".env")
 
-from ml.causal_model import estimate_causal_effects, treatment_catalog
+from ml.causal_model import (
+    LANDMARK_DAYS,
+    WINDOW_DAYS,
+    estimate_causal_effects,
+    treatment_catalog,
+)
 from ml.data_loader import load_training_data
-from ml.feature_engineering import build_customer_features
+from ml.feature_engineering import landmark_dataset, prepare_frames
 
 
 def upload_estimates(estimates: pd.DataFrame, *, replace: bool = False) -> None:
@@ -91,6 +97,54 @@ def upload_estimates(estimates: pd.DataFrame, *, replace: bool = False) -> None:
     print(f"  causal_estimates: {len(values)} rows uploaded")
 
 
+def build_report(estimates: pd.DataFrame, population: pd.DataFrame) -> dict:
+    """Naive vs doubly robust vs ground truth (when the synthetic truth is available)."""
+    rows = estimates.drop(columns=["organization_id"]).to_dict(orient="records")
+    report: dict = {
+        "design": {
+            "landmark_days": LANDMARK_DAYS,
+            "outcome_window_days": WINDOW_DAYS,
+            "population": len(population),
+            "outcome_rate": round(float(population["churned_in_window"].mean()), 3),
+            "estimator": "AIPW (doubly robust), 95% bootstrap CI",
+        },
+        "estimates": rows,
+    }
+
+    meta_path = ROOT / "data" / "synthetic" / "metadata.json"
+    if meta_path.exists():
+        truth = {
+            (r["treatment"], r["segment"]): r["true_ate_pp"]
+            for r in json.loads(meta_path.read_text()).get("true_playbook_effects", [])
+        }
+        estimable = [r for r in rows if r["treated_count"] > 0 and r["confidence_upper"] != r["confidence_lower"]]
+        for r in rows:
+            r["true_ate"] = truth.get((r["treatment"], r["segment"]))
+        if estimable:
+            report["vs_truth"] = {
+                "cells": len(estimable),
+                "mean_abs_error_naive": round(
+                    sum(abs(r["naive_ate"] - truth[(r["treatment"], r["segment"])]) for r in estimable)
+                    / len(estimable),
+                    2,
+                ),
+                "mean_abs_error_aipw": round(
+                    sum(abs(r["ate"] - truth[(r["treatment"], r["segment"])]) for r in estimable)
+                    / len(estimable),
+                    2,
+                ),
+                "ci_coverage": round(
+                    sum(
+                        r["confidence_lower"] <= truth[(r["treatment"], r["segment"])] <= r["confidence_upper"]
+                        for r in estimable
+                    )
+                    / len(estimable),
+                    3,
+                ),
+            }
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Estimate causal ATEs and upload")
     parser.add_argument("--csv-only", action="store_true", help="Skip Supabase upload")
@@ -99,48 +153,49 @@ def main() -> None:
         action="store_true",
         help="Replace existing demo org causal estimates",
     )
+    parser.add_argument(
+        "--from-db",
+        action="store_true",
+        help="Read data from Supabase instead of data/synthetic/*.csv",
+    )
     args = parser.parse_args()
 
     print("Loading data...")
-    data = load_training_data(prefer_postgres=True)
-    features = build_customer_features(data)
-    labels = (
-        data["churn_labels"]
-        .sort_values("snapshot_date")
-        .groupby("customer_id", as_index=False)
-        .tail(1)
+    frames = prepare_frames(load_training_data(prefer_postgres=args.from_db))
+    population = landmark_dataset(frames, LANDMARK_DAYS, WINDOW_DAYS)
+    print(
+        f"  causal population: {len(population)} accounts active at day {LANDMARK_DAYS} "
+        f"with a full {WINDOW_DAYS}-day outcome window"
     )
-    features = features.merge(
-        labels[["customer_id", "churned"]],
-        on="customer_id",
-        how="left",
-    )
-    features["churned"] = features["churned"].fillna(0).astype(int)
 
-    print(f"  customers in feature set: {len(features)}")
-    print("Estimating causal effects (OLS-adjusted + bootstrap)...")
-    estimates = estimate_causal_effects(features)
+    print("Estimating causal effects (AIPW + bootstrap)...")
+    estimates = estimate_causal_effects(population)
 
     out_dir = ROOT / "data" / "synthetic"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "causal_estimates.csv"
-    estimates.to_csv(out_path, index=False)
-    print(f"Saved {out_path}")
+    estimates.to_csv(out_dir / "causal_estimates.csv", index=False)
+    report = build_report(estimates, population)
+    (out_dir / "causal_report.json").write_text(json.dumps(report, indent=2) + "\n")
+    print("Saved data/synthetic/causal_estimates.csv and causal_report.json")
 
     print("\nTreatment catalog:")
     for t in treatment_catalog():
         print(f"  - {t['key']}: {t['label']}")
 
-    print("\nATE summary (pp churn reduction when treated):")
-    for treatment in estimates["treatment"].unique():
-        sub = estimates[estimates["treatment"] == treatment]
-        print(f"  {treatment}:")
-        for _, row in sub.iterrows():
-            print(
-                f"    {row['segment']}: {row['ate']:+.2f}pp "
-                f"[{row['confidence_lower']:.2f}, {row['confidence_upper']:.2f}] "
-                f"n={row['sample_size']}"
-            )
+    print("\nATE summary (pp churn reduction; naive in brackets):")
+    for row in report["estimates"]:
+        truth = f" · true {row['true_ate']:+.2f}" if row.get("true_ate") is not None else ""
+        print(
+            f"  {row['treatment']:<26} {row['segment']:<11} {row['ate']:+6.2f}pp "
+            f"[{row['confidence_lower']:.2f}, {row['confidence_upper']:.2f}] "
+            f"(naive {row['naive_ate']:+.2f}){truth}"
+        )
+    if "vs_truth" in report:
+        v = report["vs_truth"]
+        print(
+            f"\nvs ground truth: mean abs error naive {v['mean_abs_error_naive']}pp, "
+            f"AIPW {v['mean_abs_error_aipw']}pp, CI coverage {v['ci_coverage']:.0%}"
+        )
 
     if not args.csv_only:
         print("\nUploading to Supabase...")

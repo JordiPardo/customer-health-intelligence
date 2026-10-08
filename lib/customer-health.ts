@@ -1,5 +1,11 @@
 import type { CustomerWithRisk, UsagePoint } from "@/lib/types";
-import { getRiskLevel, riskLabel } from "@/lib/risk";
+import {
+  formatChurnDays,
+  formatUsd,
+  getRiskLevel,
+  MODEL_HORIZON_DAYS,
+  riskLabel,
+} from "@/lib/risk";
 
 export type CustomerTimelineEvent = {
   date: string;
@@ -33,11 +39,11 @@ export function deriveRiskDrivers(
   } = {},
 ): RiskDriver[] {
   const drivers: RiskDriver[] = [];
-  const level = getRiskLevel(customer.churn_risk_30d);
+  const level = getRiskLevel(customer.churn_risk_90d);
 
   drivers.push({
-    label: `${riskLabel(level)} 30-day churn risk`,
-    detail: `${(customer.churn_risk_30d * 100).toFixed(0)}% probability of churn within 30 days (Cox model).`,
+    label: `${riskLabel(level)} 90-day churn risk`,
+    detail: `${(customer.churn_risk_90d * 100).toFixed(0)}% probability of churn within 90 days (Cox model; portfolio average ≈ 7%).`,
     severity: level === "high" ? "high" : level === "medium" ? "medium" : "low",
   });
 
@@ -48,7 +54,7 @@ export function deriveRiskDrivers(
       detail: "Login volume dropped in the most recent month vs. prior month.",
       severity: "high",
     });
-  } else if (trend === "stable" && customer.churn_risk_30d >= 0.3) {
+  } else if (trend === "stable" && level !== "low") {
     drivers.push({
       label: "Flat engagement",
       detail: "Usage is not recovering — account may need proactive outreach.",
@@ -72,19 +78,11 @@ export function deriveRiskDrivers(
     });
   }
 
-  if (customer.mrr >= 5000 && customer.churn_risk_30d > 0.4) {
+  if (customer.mrr >= 2000 && level === "high") {
     drivers.push({
       label: "High-value account at risk",
-      detail: `$${customer.mrr.toLocaleString()} MRR in ${customer.segment} — prioritize retention ROI.`,
+      detail: `${formatUsd(customer.mrr)} MRR in ${customer.segment} — prioritize retention ROI.`,
       severity: "high",
-    });
-  }
-
-  if (customer.churn_risk_90d - customer.churn_risk_30d > 0.15) {
-    drivers.push({
-      label: "Risk accelerating over time",
-      detail: "90-day risk materially exceeds 30-day — deterioration may be underway.",
-      severity: "medium",
     });
   }
 
@@ -95,17 +93,25 @@ export function confidenceSummary(
   customer: CustomerWithRisk,
 ): { headline: string; detail: string } {
   const ci = customer.confidence_interval;
-  if (!ci?.lower_days || !ci?.upper_days) {
+  if (ci?.median_days != null) {
     return {
-      headline: "Moderate confidence",
-      detail:
-        "Survival estimates use synthetic telemetry. With real product data, confidence intervals tighten as usage history grows.",
+      headline: `Median time to churn: ${ci.median_days} days`,
+      detail: `The model gives a 25% chance of churn by day ${formatChurnDays(ci.lower_days)} and 50% by day ${ci.median_days}; ${
+        ci.upper_days != null
+          ? `75% by day ${ci.upper_days}`
+          : `75% is not reached within the ${MODEL_HORIZON_DAYS}-day horizon`
+      }.`,
     };
   }
-
+  if (ci?.lower_days != null) {
+    return {
+      headline: `25% chance of churn within ${ci.lower_days} days`,
+      detail: `Churn is more likely than not to happen after the ${MODEL_HORIZON_DAYS}-day model horizon, so the median is not reported.`,
+    };
+  }
   return {
-    headline: "Estimated churn window",
-    detail: `Median ${ci.median_days ?? "—"} days to churn (90% CI: ${ci.lower_days}–${ci.upper_days} days). Wider intervals mean less historical signal for this account profile.`,
+    headline: `Likely retained beyond ${MODEL_HORIZON_DAYS} days`,
+    detail: `Predicted churn probability stays below 25% across the ${MODEL_HORIZON_DAYS}-day horizon the model is trained on.`,
   };
 }
 
@@ -123,7 +129,7 @@ export function buildTimelineEvents(
       date: p.event_date,
       category: "payment",
       title: isBad ? "Payment issue" : "Payment received",
-      detail: `${p.event_type.replace(/_/g, " ")} · $${Number(p.amount).toLocaleString()}`,
+      detail: `${p.event_type.replace(/_/g, " ")} · ${formatUsd(Number(p.amount), 2)}`,
       severity: isBad ? "danger" : "info",
     });
   }

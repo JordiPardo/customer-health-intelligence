@@ -1,0 +1,112 @@
+{
+  "seed": 42,
+  "num_customers": 3000,
+  "snapshot_date": "2025-04-30",
+  "observed_churn_rate": 0.309,
+  "downgrade_rate": 0.049,
+  "organization_id": "00000000-0000-4000-8000-000000000001",
+  "anomaly_cohort": "2024-08-01",
+  "weibull": {
+    "shape": 0.9,
+    "scale": 0.035
+  },
+  "true_coefficients": {
+    "login_trend": -12.0,
+    "log_early_logins": -0.5,
+    "payment_failure_rate": 4.0,
+    "negative_sentiment_rate": 2.0,
+    "downgraded": 0.8,
+    "log_mrr": -0.2
+  },
+  "anomaly_cohort_log_hr": 0.6,
+  "causal_design": {
+    "landmark_days": 90,
+    "outcome_window_days": 180
+  },
+  "true_playbook_effects": [
+    {
+      "treatment": "proactive_success_call",
+      "segment": "SMB",
+      "true_ate_pp": 5.73,
+      "true_log_hr": -0.3,
+      "population": 698
+    },
+    {
+      "treatment": "proactive_success_call",
+      "segment": "Mid-Market",
+      "true_ate_pp": 6.06,
+      "true_log_hr": -0.7,
+      "population": 545
+    },
+    {
+      "treatment": "proactive_success_call",
+      "segment": "Enterprise",
+      "true_ate_pp": 4.59,
+      "true_log_hr": -0.5,
+      "population": 327
+    },
+    {
+      "treatment": "payment_recovery_workflow",
+      "segment": "SMB",
+      "true_ate_pp": 8.45,
+      "true_log_hr": -0.5,
+      "population": 698
+    },
+    {
+      "treatment": "payment_recovery_workflow",
+      "segment": "Mid-Market",
+      "true_ate_pp": 3.12,
+      "true_log_hr": -0.4,
+      "population": 545
+    },
+    {
+      "treatment": "payment_recovery_workflow",
+      "segment": "Enterprise",
+      "true_ate_pp": 5.2,
+      "true_log_hr": -0.8,
+      "population": 327
+    },
+    {
+      "treatment": "onboarding_relaunch",
+      "segment": "SMB",
+      "true_ate_pp": 10.74,
+      "true_log_hr": -0.6,
+      "population": 698
+    },
+    {
+      "treatment": "onboarding_relaunch",
+      "segment": "Mid-Market",
+      "true_ate_pp": 2.94,
+      "true_log_hr": -0.3,
+      "population": 545
+    },
+    {
+      "treatment": "onboarding_relaunch",
+      "segment": "Enterprise",
+      "true_ate_pp": 1.22,
+      "true_log_hr": -0.1,
+      "population": 327
+    },
+    {
+      "treatment": "expansion_discount",
+      "segment": "SMB",
+      "true_ate_pp": -2.29,
+      "true_log_hr": 0.1,
+      "population": 698
+    },
+    {
+      "treatment": "expansion_discount",
+      "segment": "Mid-Market",
+      "true_ate_pp": 1.28,
+      "true_log_hr": -0.1,
+      "population": 545
+    },
+    {
+      "treatment": "expansion_discount",
+      "segment": "Enterprise",
+      "true_ate_pp": 0.0,
+      "true_log_hr": 0.0,
+      "population": 327
+    }
+  ]
+}

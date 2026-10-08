@@ -30,6 +30,7 @@ import {
   getCustomerUsage,
 } from "@/lib/queries/customers";
 import { getTopPlaybooksForSegment } from "@/lib/queries/playbooks";
+import { formatChurnDays, getRiskLevel, MODEL_HORIZON_DAYS } from "@/lib/risk";
 
 export async function CustomerDetailView({
   id,
@@ -69,7 +70,7 @@ export async function CustomerDetailView({
       <PageToolbar
         title={customer.name}
         question="Why is this account at risk — and what should you do about it?"
-        badge={<RiskBadge score={customer.churn_risk_30d} />}
+        badge={<RiskBadge score={customer.churn_risk_90d} />}
         actions={
           <Link
             href={appPath(base, "/customers")}
@@ -87,18 +88,20 @@ export async function CustomerDetailView({
         style={{ animationDelay: "60ms" }}
       >
         <div className="stat-tile px-4 py-3.5">
-          <p className="text-label">90-day churn risk</p>
+          <p className="text-label">30-day churn risk</p>
           <p className="mt-1.5 text-stat">
-            {(customer.churn_risk_90d * 100).toFixed(0)}%
+            {(customer.churn_risk_30d * 100).toFixed(0)}%
           </p>
-          <p className="mt-1 text-caption">Longer-horizon Cox estimate</p>
+          <p className="mt-1 text-caption">Short-horizon Cox estimate</p>
         </div>
         <div className="stat-tile px-4 py-3.5">
           <p className="text-label">Est. days to churn</p>
           <p className="mt-1.5 text-stat">
-            {customer.median_days_to_churn ?? "—"}
+            {formatChurnDays(customer.median_days_to_churn)}
           </p>
-          <p className="mt-1 text-caption">Median survival time</p>
+          <p className="mt-1 text-caption">
+            Median, within the {MODEL_HORIZON_DAYS}-day model horizon
+          </p>
         </div>
         <div className="stat-tile px-4 py-3.5">
           <p className="text-label">Active risk drivers</p>
@@ -137,7 +140,7 @@ export async function CustomerDetailView({
         <Card interactive>
           <CardHeader>
             <CardTitle subtitle={uncertainty.detail}>
-              Confidence & uncertainty
+              Churn timing
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -147,21 +150,21 @@ export async function CustomerDetailView({
             {customer.confidence_interval && (
               <dl className="grid grid-cols-3 gap-3 text-center text-xs">
                 <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border-subtle)] px-2 py-3">
-                  <dt className="text-[var(--muted)]">Lower</dt>
+                  <dt className="text-[var(--muted)]">25% chance by</dt>
                   <dd className="mt-1 font-semibold tabular-nums">
-                    {customer.confidence_interval.lower_days ?? "—"}d
+                    {formatChurnDays(customer.confidence_interval.lower_days)}d
                   </dd>
                 </div>
                 <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border-subtle)] px-2 py-3">
-                  <dt className="text-[var(--muted)]">Median</dt>
+                  <dt className="text-[var(--muted)]">50% chance by</dt>
                   <dd className="mt-1 font-semibold tabular-nums">
-                    {customer.confidence_interval.median_days ?? "—"}d
+                    {formatChurnDays(customer.confidence_interval.median_days)}d
                   </dd>
                 </div>
                 <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border-subtle)] px-2 py-3">
-                  <dt className="text-[var(--muted)]">Upper</dt>
+                  <dt className="text-[var(--muted)]">75% chance by</dt>
                   <dd className="mt-1 font-semibold tabular-nums">
-                    {customer.confidence_interval.upper_days ?? "—"}d
+                    {formatChurnDays(customer.confidence_interval.upper_days)}d
                   </dd>
                 </div>
               </dl>
@@ -177,7 +180,7 @@ export async function CustomerDetailView({
       <Card interactive>
         <CardHeader>
           <CardTitle
-            subtitle="Estimated retention from Cox model, conditional on current tenure"
+            subtitle="Probability the account is still active over the next 90 days (Cox model)"
           >
             Survival curve
           </CardTitle>
@@ -235,7 +238,7 @@ export async function CustomerDetailView({
           </Link>
         </CardHeader>
         <CardContent>
-          {customer.churn_risk_30d > 0.6 && (
+          {getRiskLevel(customer.churn_risk_90d) === "high" && (
             <div className="mb-4 rounded-[var(--radius)] border border-[var(--danger)]/20 bg-[var(--danger-muted)] px-3.5 py-2.5 text-xs text-[var(--danger)]">
               High churn risk — prioritize the top validated playbook below within
               7 days.

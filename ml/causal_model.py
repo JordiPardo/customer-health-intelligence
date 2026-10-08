@@ -1,26 +1,37 @@
 """
-Estimate average treatment effects (ATE) for retention playbooks by segment.
+Estimate the causal effect of historical retention playbooks by segment.
 
-Treatment assignment uses feature-based observational proxies (not outcomes).
-ATE is OLS-adjusted churn reduction with bootstrap confidence intervals.
+Design (landmark analysis): playbooks were decided at day LANDMARK_DAYS after
+signup. The population is every account still active at its landmark with a
+full outcome window before the snapshot; covariates are what customer success
+could see at the landmark; the outcome is churn within WINDOW_DAYS afterwards.
+
+Estimator: augmented inverse-propensity weighting (AIPW, "doubly robust").
+Riskier-looking accounts were more likely to receive playbooks, so a naive
+treated-vs-untreated comparison is biased towards "the playbook increases
+churn". AIPW combines a propensity model and an outcome model and is
+consistent if either is correctly specified. 95% CIs come from a bootstrap.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+
+from ml.feature_engineering import CAUSAL_COVARIATES, PLAYBOOK_KEYS
 
 DEMO_ORG_ID = "00000000-0000-4000-8000-000000000001"
 SEGMENTS = ["SMB", "Mid-Market", "Enterprise"]
 
-MIN_SEGMENT_SAMPLE = 25
-MIN_TREATED = 8
-MIN_CONTROL = 8
+LANDMARK_DAYS = 90
+WINDOW_DAYS = 180
 BOOTSTRAP_ITERATIONS = 200
+PROPENSITY_CLIP = (0.02, 0.98)
+MIN_TREATED = 10
 
 
 @dataclass(frozen=True)
@@ -28,7 +39,6 @@ class TreatmentSpec:
     key: str
     label: str
     description: str
-    treated: Callable[[pd.DataFrame], pd.Series]
 
 
 TREATMENTS: list[TreatmentSpec] = [
@@ -36,127 +46,110 @@ TREATMENTS: list[TreatmentSpec] = [
         key="proactive_success_call",
         label="Proactive success call",
         description="Dedicated CSM outreach for accounts with support friction and declining engagement.",
-        treated=lambda df: (df["ticket_count"] >= 2)
-        & (df["negative_sentiment_rate"] >= 0.2)
-        & (df["login_trend"] < 0),
     ),
     TreatmentSpec(
         key="payment_recovery_workflow",
         label="Payment recovery workflow",
         description="Automated dunning and billing remediation after failed payments.",
-        treated=lambda df: (df["payment_failure_rate"] >= 0.1)
-        | (df["past_due_count"] >= 2),
     ),
     TreatmentSpec(
         key="onboarding_relaunch",
         label="Onboarding relaunch",
         description="Guided re-onboarding for early-tenure accounts with low product adoption.",
-        treated=lambda df: (df["tenure_days"] <= 365)
-        & (df["logins_last_90d"] < 20),
     ),
     TreatmentSpec(
         key="expansion_discount",
         label="Expansion discount",
         description="Short-term pricing relief for downgraded or declining-usage accounts.",
-        treated=lambda df: (df["downgraded"] == 1) | (df["login_trend"] <= -0.3),
     ),
 ]
+assert [t.key for t in TREATMENTS] == PLAYBOOK_KEYS
 
 
-def _regression_ate(
-    outcome: np.ndarray, treatment: np.ndarray, covariates: np.ndarray
-) -> float:
-    """Churn reduction (pp) when treated, adjusted for covariates."""
-    if treatment.sum() < MIN_TREATED or (1 - treatment).sum() < MIN_CONTROL:
+def _design_matrix(df: pd.DataFrame) -> np.ndarray:
+    segments = pd.get_dummies(df["segment"]).reindex(columns=SEGMENTS[1:], fill_value=0)
+    X = np.column_stack([df[CAUSAL_COVARIATES].to_numpy(float), segments.to_numpy(float)])
+    return StandardScaler().fit_transform(X)
+
+
+def _fit_predict(X: np.ndarray, y: np.ndarray, X_new: np.ndarray) -> np.ndarray:
+    if len(np.unique(y)) < 2:
+        return np.full(len(X_new), float(y.mean()) if len(y) else 0.0)
+    model = LogisticRegression(C=10.0, max_iter=2000)
+    model.fit(X, y)
+    return model.predict_proba(X_new)[:, 1]
+
+
+def aipw_scores(df: pd.DataFrame, treatment_col: str, outcome_col: str) -> np.ndarray:
+    """Per-account doubly robust scores; their mean is the ATE (risk difference)."""
+    X = _design_matrix(df)
+    t = df[treatment_col].to_numpy(int)
+    y = df[outcome_col].to_numpy(int)
+
+    e = np.clip(_fit_predict(X, t, X), *PROPENSITY_CLIP)
+    m1 = _fit_predict(X[t == 1], y[t == 1], X)
+    m0 = _fit_predict(X[t == 0], y[t == 0], X)
+    return (m1 - m0) + t * (y - m1) / e - (1 - t) * (y - m0) / (1 - e)
+
+
+def _segment_effects(df: pd.DataFrame, key: str) -> dict[str, float]:
+    """Churn reduction in percentage points per segment (positive = playbook helps)."""
+    scores = aipw_scores(df, f"pb_{key}", "churned_in_window")
+    return {
+        seg: float(-scores[(df["segment"] == seg).to_numpy()].mean() * 100)
+        for seg in SEGMENTS
+        if (df["segment"] == seg).any()
+    }
+
+
+def naive_effect(df: pd.DataFrame, key: str, segment: str) -> float:
+    seg = df[df["segment"] == segment]
+    treated = seg[seg[f"pb_{key}"] == 1]["churned_in_window"]
+    control = seg[seg[f"pb_{key}"] == 0]["churned_in_window"]
+    if treated.empty or control.empty:
         return 0.0
-
-    X = np.column_stack([covariates, treatment.astype(float)])
-    model = LinearRegression()
-    model.fit(X, outcome)
-    return float(-model.coef_[-1] * 100.0)
+    return float((control.mean() - treated.mean()) * 100)
 
 
-def _bootstrap_ci(
-    df: pd.DataFrame,
-    spec: TreatmentSpec,
-    covariate_cols: list[str],
-    *,
-    n_iter: int = BOOTSTRAP_ITERATIONS,
-) -> tuple[float, float, float, int]:
-    """Return (ate, ci_lower, ci_upper, segment_sample_size)."""
-    n = len(df)
-    if n < MIN_SEGMENT_SAMPLE:
-        return 0.0, 0.0, 0.0, n
-
-    outcome = df["churned"].astype(float).values
-    treatment = spec.treated(df).fillna(False).astype(int).values
-    X = df[covariate_cols].astype(float).values
-
-    if treatment.sum() < MIN_TREATED or (1 - treatment).sum() < MIN_CONTROL:
-        return 0.0, 0.0, 0.0, n
-
-    ate = _regression_ate(outcome, treatment, X)
-
-    boot: list[float] = []
-    rng = np.random.default_rng(42)
-    for _ in range(n_iter):
-        idx = rng.integers(0, n, size=n)
-        boot_df = df.iloc[idx]
-        boot_t = spec.treated(boot_df).fillna(False).astype(int).values
-        boot_y = boot_df["churned"].astype(float).values
-        boot_x = boot_df[covariate_cols].astype(float).values
-        if boot_t.sum() < 5 or (1 - boot_t).sum() < 5:
-            continue
-        try:
-            boot.append(_regression_ate(boot_y, boot_t, boot_x))
-        except Exception:
-            continue
-
-    if len(boot) < 30:
-        margin = 3.0
-        return ate, ate - margin, ate + margin, n
-
-    lo, hi = np.percentile(boot, [2.5, 97.5])
-    return ate, float(lo), float(hi), n
-
-
-def estimate_causal_effects(features: pd.DataFrame) -> pd.DataFrame:
+def estimate_causal_effects(
+    population: pd.DataFrame, *, n_boot: int = BOOTSTRAP_ITERATIONS, seed: int = 42
+) -> pd.DataFrame:
     """
-    Return one row per (treatment, segment) ready for causal_estimates table.
+    Return one row per (treatment, segment) for the causal_estimates table,
+    plus naive estimates and treated counts for the methodology report.
     """
-    covariate_cols = [
-        "tenure_days",
-        "mrr",
-        "log_mrr",
-        "downgraded",
-        "logins_last_90d",
-        "login_trend",
-        "payment_failure_rate",
-        "past_due_count",
-        "negative_sentiment_rate",
-        "ticket_count",
-    ]
+    df = population.reset_index(drop=True)
+    rng = np.random.default_rng(seed)
+    boot_idx = [rng.integers(0, len(df), size=len(df)) for _ in range(n_boot)]
 
     rows: list[dict] = []
     for spec in TREATMENTS:
-        for segment in SEGMENTS:
-            seg_df = features[features["segment"] == segment].copy()
-            ate, lo, hi, sample_size = _bootstrap_ci(
-                seg_df, spec, covariate_cols
-            )
-            ate = float(np.clip(ate, -99.99, 99.99))
-            lo = float(np.clip(lo, -99.99, 99.99))
-            hi = float(np.clip(hi, -99.99, 99.99))
+        point = _segment_effects(df, spec.key)
+        boot: dict[str, list[float]] = {seg: [] for seg in SEGMENTS}
+        for idx in boot_idx:
+            sample = df.iloc[idx].reset_index(drop=True)
+            for seg, value in _segment_effects(sample, spec.key).items():
+                boot[seg].append(value)
 
+        for segment in SEGMENTS:
+            seg_df = df[df["segment"] == segment]
+            treated = int(seg_df[f"pb_{spec.key}"].sum())
+            if treated < MIN_TREATED or segment not in point:
+                ate = lo = hi = 0.0
+            else:
+                ate = point[segment]
+                lo, hi = np.percentile(boot[segment], [2.5, 97.5])
             rows.append(
                 {
                     "organization_id": DEMO_ORG_ID,
                     "treatment": spec.key,
                     "segment": segment,
-                    "ate": round(ate, 2),
-                    "confidence_lower": round(lo, 2),
-                    "confidence_upper": round(hi, 2),
-                    "sample_size": int(sample_size),
+                    "ate": round(float(np.clip(ate, -99.99, 99.99)), 2),
+                    "confidence_lower": round(float(np.clip(lo, -99.99, 99.99)), 2),
+                    "confidence_upper": round(float(np.clip(hi, -99.99, 99.99)), 2),
+                    "sample_size": len(seg_df),
+                    "treated_count": treated,
+                    "naive_ate": round(naive_effect(df, spec.key, segment), 2),
                 }
             )
 
@@ -164,11 +157,4 @@ def estimate_causal_effects(features: pd.DataFrame) -> pd.DataFrame:
 
 
 def treatment_catalog() -> list[dict[str, str]]:
-    return [
-        {
-            "key": t.key,
-            "label": t.label,
-            "description": t.description,
-        }
-        for t in TREATMENTS
-    ]
+    return [{"key": t.key, "label": t.label, "description": t.description} for t in TREATMENTS]

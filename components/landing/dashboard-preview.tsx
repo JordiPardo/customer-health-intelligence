@@ -1,4 +1,8 @@
 import Link from "next/link";
+import modelReport from "@/data/synthetic/model_report.json";
+
+const bands = modelReport.risk_bands;
+const bandPct = (share: number) => Math.round(share * 100);
 
 /** Static product preview — mirrors real app UI for marketing credibility. */
 export function DashboardPreview() {
@@ -45,7 +49,9 @@ export function DashboardPreview() {
                 <p className="text-[11px] font-semibold text-[var(--foreground)]">
                   Portfolio overview
                 </p>
-                <p className="text-[9px] text-[var(--muted)]">Last 30 days · 500 accounts</p>
+                <p className="text-[9px] text-[var(--muted)]">
+                  90-day risk · {modelReport.n_active_scored.toLocaleString("en-US")} active accounts
+                </p>
               </div>
               <span className="rounded-full border border-[var(--success)]/30 bg-[var(--success-muted)] px-2 py-0.5 text-[9px] font-medium text-[var(--success)]">
                 Live
@@ -54,10 +60,10 @@ export function DashboardPreview() {
 
             <div className="mb-3 grid grid-cols-4 gap-1.5 sm:gap-2">
               {[
-                { label: "Customers", value: "500" },
-                { label: "High risk", value: "22%", warn: true },
-                { label: "Medium", value: "41%" },
-                { label: "Low risk", value: "37%", good: true },
+                { label: "Accounts", value: modelReport.n_active_scored.toLocaleString("en-US") },
+                { label: "High risk", value: `${bandPct(bands.high)}%`, warn: true },
+                { label: "Medium", value: `${bandPct(bands.medium)}%` },
+                { label: "Low risk", value: `${bandPct(bands.low)}%`, good: true },
               ].map((kpi) => (
                 <div
                   key={kpi.label}
@@ -94,9 +100,9 @@ export function DashboardPreview() {
                 </p>
                 <div className="space-y-1.5">
                   {[
-                    { label: "High", pct: 22, color: "bg-[var(--danger)]" },
-                    { label: "Medium", pct: 41, color: "bg-[var(--warning)]" },
-                    { label: "Low", pct: 37, color: "bg-[var(--success)]" },
+                    { label: "High", pct: bandPct(bands.high), color: "bg-[var(--danger)]" },
+                    { label: "Medium", pct: bandPct(bands.medium), color: "bg-[var(--warning)]" },
+                    { label: "Low", pct: bandPct(bands.low), color: "bg-[var(--success)]" },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center gap-1.5">
                       <span className="w-10 text-[8px] text-[var(--muted)]">{row.label}</span>
@@ -126,7 +132,7 @@ export function DashboardPreview() {
                   <tr className="text-[var(--muted)]">
                     <th className="px-2 py-1 text-left font-medium">Account</th>
                     <th className="px-2 py-1 text-left font-medium">Segment</th>
-                    <th className="px-2 py-1 text-right font-medium">30d risk</th>
+                    <th className="px-2 py-1 text-right font-medium">90d risk</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,10 +166,10 @@ export function DashboardPreview() {
 }
 
 const PREVIEW_ROWS = [
-  { name: "Northwind Labs", segment: "Enterprise", risk: 78, badge: "bg-[var(--danger-muted)] text-[var(--danger)]" },
-  { name: "Acme Analytics", segment: "Mid-Market", risk: 71, badge: "bg-[var(--danger-muted)] text-[var(--danger)]" },
-  { name: "Globex Systems", segment: "SMB", risk: 64, badge: "bg-[var(--warning-muted)] text-[var(--warning)]" },
-  { name: "Initech Corp", segment: "Enterprise", risk: 62, badge: "bg-[var(--warning-muted)] text-[var(--warning)]" },
+  { name: "Northwind Labs", segment: "SMB", risk: 34, badge: "bg-[var(--danger-muted)] text-[var(--danger)]" },
+  { name: "Acme Analytics", segment: "Mid-Market", risk: 22, badge: "bg-[var(--danger-muted)] text-[var(--danger)]" },
+  { name: "Globex Systems", segment: "SMB", risk: 12, badge: "bg-[var(--warning-muted)] text-[var(--warning)]" },
+  { name: "Initech Corp", segment: "Enterprise", risk: 9, badge: "bg-[var(--warning-muted)] text-[var(--warning)]" },
 ];
 
 function PreviewChart() {

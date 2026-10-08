@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS experiment_results CASCADE;
 DROP TABLE IF EXISTS experiment_assignments CASCADE;
 DROP TABLE IF EXISTS experiments CASCADE;
 DROP TABLE IF EXISTS causal_estimates CASCADE;
+DROP TABLE IF EXISTS playbook_touches CASCADE;
 DROP TABLE IF EXISTS survival_predictions CASCADE;
 DROP TABLE IF EXISTS churn_labels CASCADE;
 DROP TABLE IF EXISTS support_sentiment CASCADE;

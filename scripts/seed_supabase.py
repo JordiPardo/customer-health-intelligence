@@ -5,7 +5,7 @@ Prerequisites:
   1. Run supabase/migrations/001_initial_schema.sql in your Supabase project
   2. Copy .env.example → .env.local (root) and scripts/.env (or use root .env)
   3. python scripts/generate_synthetic_data.py
-  4. python scripts/seed_supabase.py
+  4. python scripts/seed_supabase.py --postgres --replace
 
 If REST API can't see tables after migration, either:
   - Run supabase/migrations/002_reload_schema_cache.sql in SQL Editor, or
@@ -39,7 +39,9 @@ SEED_TABLES = [
     "support_sentiment",
     "churn_labels",
     "cohort_anomalies",
+    "playbook_touches",
 ]
+DEMO_ORG_ID = "00000000-0000-4000-8000-000000000001"
 
 load_dotenv(ROOT / ".env.local")
 load_dotenv(ROOT / ".env")
@@ -214,6 +216,26 @@ def postgres_table_count(table: str) -> int:
             return int(cur.fetchone()[0])
 
 
+def clear_demo_org_postgres() -> None:
+    """Delete all demo-org data (customer child tables cascade)."""
+    import psycopg2
+
+    with psycopg2.connect(get_database_url()) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM experiments WHERE organization_id = %s", (DEMO_ORG_ID,)
+            )
+            cur.execute(
+                "DELETE FROM causal_estimates WHERE organization_id = %s", (DEMO_ORG_ID,)
+            )
+            cur.execute(
+                "DELETE FROM cohort_anomalies WHERE organization_id = %s", (DEMO_ORG_ID,)
+            )
+            cur.execute("DELETE FROM customers WHERE organization_id = %s", (DEMO_ORG_ID,))
+            print(f"  Cleared demo org: {cur.rowcount} customers (+ cascaded events)")
+        conn.commit()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed Supabase with synthetic CSV data")
     parser.add_argument(
@@ -231,6 +253,11 @@ def main() -> None:
         action="store_true",
         help="Skip tables that already have rows (Postgres mode only)",
     )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Delete existing demo-org data before seeding (Postgres mode only)",
+    )
     args = parser.parse_args()
 
     tables = SEED_TABLES
@@ -244,6 +271,8 @@ def main() -> None:
     if args.postgres:
         print("Checking Postgres schema...")
         verify_postgres_schema()
+        if args.replace:
+            clear_demo_org_postgres()
         print("Seeding via Postgres...")
         for table in tables:
             if args.skip_existing and postgres_table_count(table) > 0:
@@ -262,7 +291,7 @@ def main() -> None:
 
     print("Seeding Supabase from CSV...")
     for table in tables:
-        insert_batches_rest(client, read_csv(f"{table}.csv"))
+        insert_batches_rest(client, table, read_csv(f"{table}.csv"))
     print("Done.")
 
 

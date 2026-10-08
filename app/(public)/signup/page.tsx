@@ -1,3 +1,4 @@
+import metadata from "@/data/synthetic/metadata.json";
 import Link from "next/link";
 import { AuthForm } from "@/components/auth/auth-form";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +15,7 @@ export default function SignupPage() {
         </Link>
         <h1 className="mb-1">Start free trial</h1>
         <p className="mb-6 text-caption">
-          Demo includes 500 synthetic customers with survival predictions.
+          Demo includes {metadata.num_customers.toLocaleString("en-US")} synthetic customers with survival predictions.
         </p>
         <Card>
           <CardContent>
