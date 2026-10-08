@@ -14,14 +14,15 @@ Built to demonstrate product thinking, analytics depth, and clean full-stack eng
 | [Methodology case study](https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/methodology) | Business problem, ML approach, limitations |
 | [Sign up](https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app/signup) | Explore full app with demo org data |
 
-> Replace URLs above with your custom domain when configured (e.g. `retenzapp.com`).
-
 ### Screenshots
 
-<!-- Add to docs/screenshots/ and embed when ready -->
-| Dashboard | Customer detail |
-|-----------|-----------------|
-| *`docs/screenshots/dashboard.png`* | *`docs/screenshots/customer-detail.png`* |
+**Dashboard**: portfolio health, revenue at risk and cohort churn trend
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+**Customer detail**: 30/90-day churn risk, risk drivers and AI Copilot brief
+
+![Customer detail](docs/screenshots/customer-detail.png)
 
 ---
 
@@ -198,7 +199,7 @@ LANGFUSE_SECRET_KEY=
 
 ## Roadmap
 
-**Next:** custom domain, portfolio screenshots, Stripe billing (Phase 6).
+**Next:** custom domain, Stripe billing (Phase 6).
 
 See **[docs/ROADMAP.md](docs/ROADMAP.md)**.
 

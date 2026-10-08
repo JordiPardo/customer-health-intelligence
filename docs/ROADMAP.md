@@ -14,7 +14,7 @@
 ## Phase 6 — Production & billing (next)
 
 - [ ] Custom domain (e.g. retenzapp.com) + Supabase auth URLs
-- [ ] README screenshots for GitHub portfolio
+- [x] README screenshots for GitHub portfolio
 - [ ] Stripe Checkout / subscription tier (soft gate)
 - [ ] Pricing section on landing
 
@@ -22,7 +22,7 @@
 
 - [ ] Replace service-role reads with strict RLS per org
 - [ ] GitHub Action for ML pipeline (manual dispatch)
-- [ ] Expand Playwright coverage (demo + auth flows)
+- [ ] Expand Playwright coverage (auth flows; demo golden path done)
 - [ ] Error monitoring (Sentry) + Vercel Analytics
 
 ## Future (optional)
@@ -34,7 +34,7 @@
 
 ## Portfolio checklist
 
-- [ ] Live demo URL in README + LinkedIn
-- [ ] 2 screenshots (dashboard, customer detail)
+- [ ] Live demo URL on LinkedIn (README done)
+- [x] 2 screenshots (dashboard, customer detail)
 - [ ] Incognito smoke test on production
 - [ ] Methodology page linked from landing

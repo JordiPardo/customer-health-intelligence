@@ -1,0 +1,19 @@
+name: Keep demo alive
+
+# Supabase free tier pauses projects after ~1 week without activity.
+# Hitting the demo triggers ISR revalidation, which queries Supabase.
+on:
+  schedule:
+    - cron: "0 7 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping demo pages
+        run: |
+          base=https://customer-health-intelligence-jordi-pardo-s-projects.vercel.app
+          for path in /demo/dashboard /demo/customers; do
+            curl -fsS -o /dev/null -w "$path %{http_code}\n" "$base$path"
+          done
